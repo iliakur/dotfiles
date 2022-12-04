@@ -1,0 +1,5 @@
+[user]
+	email = ilia.kurenkov@gmail.com
+	name = Ilia Kurenkov
+[includeIf "gitdir:~/dd/"]
+    path = ~/dd/.gitconfig
