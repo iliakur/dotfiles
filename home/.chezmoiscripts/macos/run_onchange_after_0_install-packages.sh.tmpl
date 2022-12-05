@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "> Running $(basename "$0") "
+
+set -eufo pipefail
+
+{{ $brews := list
+    "kind"
+    "hatch"
+    "pyright"
+    "pyenv-virtualenv"
+    "shellcheck"
+    "withgraphite/tap/graphite"
+    "fd"
+    "jq"
+    "yq"
+    "pinentry-mac"
+    "pre-commit"
+    "watch"
+    "findutils"
+    "ripgrep"
+    "htop"
+    "starship" -}}
+
+{{ $casks := list
+    "1password/tap/1password-cli"
+    "finicky"
+    "vlc"
+    "iterm2"
+    "docker"
+    "emacs"
+    "rectangle"
+    "karabiner-elements"
+    "homebrew/cask-fonts/font-inconsolata"
+    "homebrew/cask-fonts/font-linux-biolinum"
+    "homebrew/cask-fonts/font-fira-code" -}}
+
+brew bundle --no-lock --file=/dev/stdin <<EOF
+{{ range ($brews | sortAlpha | uniq) -}}
+brew "{{ . }}"
+{{ end -}}
+{{ range ($casks | sortAlpha | uniq) -}}
+cask "{{ . }}"
+{{ end -}}
+EOF
