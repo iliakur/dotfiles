@@ -124,3 +124,16 @@ alias cmcd='chezmoi cd'
 
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
+
+
+# Toggle (Iterm2) Profile
+function tp(){
+    oldprof="${ITERM_PROFILE}"
+    if [ "${oldprof}" = "Dark" ]
+       then
+           newprof="Default"
+        else
+            newprof="Dark"
+    fi
+    iterm2_profile "${newprof}"
+}
