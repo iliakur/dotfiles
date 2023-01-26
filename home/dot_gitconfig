@@ -3,3 +3,5 @@
 	name = Ilia Kurenkov
 [includeIf "gitdir:~/dd/"]
     path = ~/dd/.gitconfig
+[includeIf "gitdir:~/src/"]
+    path = ~/src/.gitconfig
