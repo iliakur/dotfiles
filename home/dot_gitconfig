@@ -1,7 +1,8 @@
 [user]
-	email = ilia.kurenkov@gmail.com
 	name = Ilia Kurenkov
 [includeIf "gitdir:~/dd/"]
+    path = ~/dd/.gitconfig
+[includeIf "gitdir:~/go/src/github.com/DataDog/"]
     path = ~/dd/.gitconfig
 [includeIf "gitdir:~/src/"]
     path = ~/src/.gitconfig
