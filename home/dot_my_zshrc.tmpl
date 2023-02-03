@@ -138,8 +138,11 @@ function tp(){
     iterm2_profile "${newprof}"
 }
 
+# These variables are needed for the declarative docs sync command.
 export CONSUL_CONFIG=$DATADOG_ROOT/consul-config
 export INT_CORE=$DATADOG_ROOT/integrations-core
 export INT_EXTRAS=$DATADOG_ROOT/integrations-extras
 
 export DD_API_KEY="{{ onepasswordRead "op://Private/dd-staging-api-key/credential" }}"
+
+eval "$(direnv hook zsh)"
