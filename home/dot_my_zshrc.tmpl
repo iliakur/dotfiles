@@ -113,7 +113,8 @@ if [ $(arch) = "i386" ]; then
     alias pyenv86="arch -x86_64 pyenv"
 fi
 
-export EDITOR="/Applications/Emacs.app/Contents/MacOS/Emacs"
+export EDITOR='emacsclient --create-frame --alternate-editor="" --no-wait'
+alias edit='emacsclient --create-frame --alternate-editor="" --no-wait'
 
 alias reload='source ~/.zshrc'
 alias ht=htop
