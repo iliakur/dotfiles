@@ -1,0 +1,4 @@
+# Files for git to ignore in all repos.
+
+# Direnv
+.envrc

@@ -1,5 +1,7 @@
 [user]
 	name = Ilia Kurenkov
+[core]
+  excludesFile="~/.gitignore"
 [includeIf "gitdir:~/dd/"]
     path = ~/dd/.gitconfig
 [includeIf "gitdir:~/go/src/github.com/DataDog/"]
