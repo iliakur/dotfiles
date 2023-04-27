@@ -1,11 +1,13 @@
 [user]
 	email = ilia.kurenkov@datadoghq.com
-	signingkey = D529FE2C80AA7129
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOY0UJFpJpOCkYWhQhCWRha5gpEpuQ5PHQ4W+e321NLm ilia.kurenkov+git-commit-signing@datadoghq.com
 [url "ssh://git@github.com/"]
     insteadOf = https://github.com/
 [core]
 	hooksPath = /usr/local/dd/global_hooks
 [commit]
 	gpgsign = true
+[gpg]
+  format = ssh
 [tag]
 	forceSignAnnotated = true

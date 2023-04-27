@@ -148,3 +148,10 @@ export INT_EXTRAS=$DATADOG_ROOT/integrations-extras
 export DD_API_KEY="{{ onepasswordRead "op://Private/dd-staging-api-key/credential" }}"
 
 eval "$(direnv hook zsh)"
+
+## DD ssh key to sign commits
+# Set SSH_AUTH_SOCK to the launchd-managed ssh-agent socket (com.openssh.ssh-agent).
+export SSH_AUTH_SOCK=$(launchctl asuser $(id -u) launchctl getenv SSH_AUTH_SOCK)
+
+# Load SSH keys from the keychain if keychain is empty.
+ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
