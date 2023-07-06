@@ -155,3 +155,5 @@ export SSH_AUTH_SOCK=$(launchctl asuser $(id -u) launchctl getenv SSH_AUTH_SOCK)
 
 # Load SSH keys from the keychain if keychain is empty.
 ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
+
+export GITHUB_TOKEN="{{ onepasswordRead "op://Private/personal-github-token/credential" }}"
