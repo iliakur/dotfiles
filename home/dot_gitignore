@@ -2,3 +2,6 @@
 
 # Direnv
 .envrc
+
+# Emacs directory configuration
+.dir-locals.el
