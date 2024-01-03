@@ -157,3 +157,8 @@ export SSH_AUTH_SOCK=$(launchctl asuser $(id -u) launchctl getenv SSH_AUTH_SOCK)
 ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
 
 export GITHUB_TOKEN="{{ onepasswordRead "op://Private/personal-github-token/credential" }}"
+
+alias k='kubectl'
+alias gma='git machete add -y'
+alias gms='git machete status'
+alias gmt='git machete traverse -yW'
