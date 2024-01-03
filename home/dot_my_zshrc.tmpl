@@ -146,6 +146,7 @@ export INT_CORE=$DATADOG_ROOT/integrations-core
 export INT_EXTRAS=$DATADOG_ROOT/integrations-extras
 
 export DD_API_KEY="{{ onepasswordRead "op://Private/dd-staging-api-key/credential" }}"
+export DD_APP_KEY="{{ onepasswordRead "op://Private/dd-staging-app-key/credential" }}"
 
 eval "$(direnv hook zsh)"
 
