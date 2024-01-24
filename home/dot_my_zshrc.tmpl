@@ -167,3 +167,14 @@ alias k='kubectl'
 alias gma='git machete add -y'
 alias gms='git machete status'
 alias gmt='git machete traverse -y'
+
+icchangelog () {
+    # Add changelogs to integrations-core quickly.
+    current_branch="$(git branch --show-current)"
+    git pull origin "${current_branch}"
+    ddev release changelog new
+    # Just to be safe, only add fragment files automatically.
+    git add **/changelog.d/*
+    git commit -m "add changelog"
+    git push origin "${current_branch}"
+}
