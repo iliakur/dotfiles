@@ -174,7 +174,10 @@ icchangelog () {
     git pull origin "${current_branch}"
     ddev release changelog new
     # Just to be safe, only add fragment files automatically.
-    git add **/changelog.d/*
+    git add -v **/changelog.d/*
+    echo "Take a moment to review the staged files!"
+    printf "%s " "Press enter to continue"
+    read ans
     git commit -m "add changelog"
     git push origin "${current_branch}"
 }
