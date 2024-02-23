@@ -151,6 +151,10 @@ export DD_SITE="${DD_STAGING_SITE}"
 export DD_API_KEY="{{ onepasswordRead "op://Private/dd-staging-api-key/credential" }}"
 export DD_APP_KEY="{{ onepasswordRead "op://Private/dd-staging-app-key/credential" }}"
 
+# Reduces the number of Agent images that we download for e2e tests in integrations-core
+export DDEV_E2E_AGENT_PY2="datadog/agent-dev:nightly-main-py2"
+export DDEV_E2E_AGENT="datadog/agent-dev:nightly-main-py3"
+
 eval "$(direnv hook zsh)"
 
 ## DD ssh key to sign commits
