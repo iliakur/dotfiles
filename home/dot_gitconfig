@@ -1,10 +1,22 @@
+# The main settings are for work.
+# Settings like core.hooksPath need to be in the main file if we want to be able to control them via cli.
+# Personal settings are loaded conditionally and override certain work settings.
 [user]
 	name = Ilia Kurenkov
+	email = ilia.kurenkov@datadoghq.com
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7kPJJpQMQRTG94gKUCEaV50jkSfHPTzarthDM6KChr ilia.kurenkov+git-commit-signing@datadoghq.com
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
+[url "git@github.com:"]
+    insteadOf = https://github.com/
 [core]
+	hooksPath = /usr/local/dd/global_hooks
   excludesFile="~/.gitignore"
-[includeIf "gitdir:~/dd/"]
-    path = ~/dd/.gitconfig
-[includeIf "gitdir:~/go/src/github.com/DataDog/"]
-    path = ~/dd/.gitconfig
+[commit]
+	gpgsign = true
+[gpg]
+  format = ssh
+[tag]
+	forceSignAnnotated = true
 [includeIf "gitdir:~/src/"]
     path = ~/src/.gitconfig
