@@ -190,7 +190,7 @@ icpr () {
     base="${1:-$(basename $(git rev-parse --abbrev-ref origin/HEAD))}"
     gh pr create --base "${base}"
     # Only create changelog if we need it.
-    python "${DATADOG_ROOT}/ddev/src/ddev/utils/scripts/check_pr.py" changelog || icchangelog
+    python "${DATADOG_ROOT}/integrations-core/ddev/src/ddev/utils/scripts/check_pr.py" changelog || icchangelog
 }
 
 icnochangelog_pr () {
