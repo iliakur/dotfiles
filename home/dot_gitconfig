@@ -18,5 +18,8 @@
   format = ssh
 [tag]
 	forceSignAnnotated = true
+[rerere]
+	enabled = true
+	autoUpdate = true
 [includeIf "gitdir:~/src/"]
     path = ~/src/.gitconfig
