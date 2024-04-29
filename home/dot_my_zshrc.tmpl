@@ -187,6 +187,22 @@ icchangelog () {
 }
 
 icpr () {
+    # This way of computing base branch has pros and cons:
+    # pro: no network connection needed
+    # con: won't work if the default branch changes after I clone!
+
+    # Some Alternatives Below
+
+    # Define some aliases to set and store the default branch locally
+    # [alias]
+	  # default-branch = config branch.default
+	  # set-default-branch = ! git config branch.default "$(git get-default-branch)"
+	  # get-default-branch = ! git remote show origin | grep 'HEAD branch:' | awk '{printf(\"%s\", $3)}'
+
+    # Use 'gh' to (most likely) query it every time
+    # $(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"
+    # As Tim Visher says: Note that that's probably a network request… But, seriously, in the Year of our Glob 2024 who actually cares that git was originally meant to make most operations possible on an airplane back when airplane's didn't have wifi?
+	  default = ! git switch "$(git default-branch)"
     base="${1:-$(basename $(git rev-parse --abbrev-ref origin/HEAD))}"
     gh pr create --base "${base}"
     # Only create changelog if we need it.
