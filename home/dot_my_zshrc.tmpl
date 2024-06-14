@@ -231,3 +231,6 @@ alias vp='gh pr view -w'
 # Reno can't parse multiple shell "words", so for this command we set EDITOR to plain client.
 # Most of the time the emacs daemon is running by then anyway.
 alias agentchangelog='EDITOR=emacsclient reno new --edit'
+
+# Prevent brew from updating packages when all I want is to install one.
+export HOMEBREW_NO_AUTO_UPDATE=1
