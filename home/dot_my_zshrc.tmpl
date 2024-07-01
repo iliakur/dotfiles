@@ -234,3 +234,7 @@ alias agentchangelog='EDITOR=emacsclient reno new --edit'
 
 # Prevent brew from updating packages when all I want is to install one.
 export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Point ddev to agent nightly builds. This is a good balance of running recent agent code without pulling every single time.
+export DDEV_E2E_AGENT_PY2="datadog/agent-dev:nightly-main-py2"
+export DDEV_E2E_AGENT="datadog/agent-dev:nightly-main-py3"
