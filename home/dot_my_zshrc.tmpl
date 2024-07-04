@@ -226,7 +226,8 @@ nbranch_dd () {
         && git checkout -B "${new_branch}" "${base}"
 }
 
-alias vp='gh pr view -w'
+alias prv='gh pr view -w'
+alias prc='gh pr create'
 
 # Reno can't parse multiple shell "words", so for this command we set EDITOR to plain client.
 # Most of the time the emacs daemon is running by then anyway.
