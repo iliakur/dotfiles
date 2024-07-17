@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+read -p "PR number or URL: " pr_id
+gh pr checkout "${pr_id}"
+branchname=$(git rev-parse --abbrev-ref HEAD)
+git push --force origin "${branchname}"
+read -p "Name of integration to sync: " int_name
+integration sync staging --branch "${branchname}" "${int_name}"
