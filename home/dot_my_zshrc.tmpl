@@ -227,7 +227,8 @@ nbranch_dd () {
 }
 
 alias prv='gh pr view -w'
-alias prc='gh pr create'
+alias prs='gh pr create' # Stands for "PR submit"
+alias prc='gh pr checkout'
 
 # Reno can't parse multiple shell "words", so for this command we set EDITOR to plain client.
 # Most of the time the emacs daemon is running by then anyway.
