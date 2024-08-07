@@ -240,3 +240,7 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 # Point ddev to agent nightly builds. This is a good balance of running recent agent code without pulling every single time.
 export DDEV_E2E_AGENT_PY2="datadog/agent-dev:nightly-main-py2"
 export DDEV_E2E_AGENT="datadog/agent-dev:nightly-main-py3"
+
+# Adjusting display rotation based on how I have my screen.
+alias vert='displayplacer "id:62124958-5E0A-4958-B471-CBEAED2E0F75 res:1080x1920 hz:75 color_depth:8 enabled:true scaling:off origin:(0,0) degree:90" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1352x878 hz:120 color_depth:8 enabled:true scaling:on origin:(-1352,511) degree:0"'
+alias hor='displayplacer "id:62124958-5E0A-4958-B471-CBEAED2E0F75 res:1920x1080 hz:75 color_depth:8 enabled:true scaling:off origin:(0,0) degree:0" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1352x878 hz:120 color_depth:8 enabled:true scaling:on origin:(-1352,511) degree:0"'
