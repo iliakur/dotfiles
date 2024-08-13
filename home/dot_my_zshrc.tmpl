@@ -215,7 +215,7 @@ icnochangelog_pr () {
 }
 
 nbranch_dd () {
-    jira_card="${1}"
+    vared -p 'Jira card link? ' -c jira_card
     vared -p 'Slug for branch: ' -c slug_input
     slug="${slug_input// /-}"
     new_branch="ik/${jira_card:+$(basename ${jira_card})/}${slug}"
