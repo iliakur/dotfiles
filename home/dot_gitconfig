@@ -23,3 +23,5 @@
 	autoUpdate = true
 [includeIf "gitdir:~/src/"]
     path = ~/src/.gitconfig
+[machete "traverse"]
+	push = false
