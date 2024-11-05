@@ -226,6 +226,9 @@ nbranch_dd () {
         && git checkout -B "${new_branch}" "${base}"
 }
 
+# Allows passing aliases to 'sudo'
+# https://askubuntu.com/a/22043
+alias sudo='sudo '
 alias prv='gh pr view -w'
 alias prs='gh pr create' # Stands for "PR submit"
 alias prc='gh pr checkout'
