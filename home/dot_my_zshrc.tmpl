@@ -222,7 +222,7 @@ nbranch_dd () {
     base="$(basename $(git rev-parse --abbrev-ref origin/HEAD))"
     # Important to chain the commands so that we don't create/checkout the branch unless the pull succeeds.
     git checkout "${base}" \
-        && git pull \
+        && git pull origin "${base}"\
         && git checkout -B "${new_branch}" "${base}"
 }
 
