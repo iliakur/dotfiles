@@ -247,3 +247,25 @@ export DDEV_E2E_AGENT="datadog/agent-dev:nightly-main-py3"
 # Adjusting display rotation based on how I have my screen.
 alias vert='displayplacer "id:62124958-5E0A-4958-B471-CBEAED2E0F75 res:1080x1920 hz:75 color_depth:8 enabled:true scaling:off origin:(0,0) degree:90" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1352x878 hz:120 color_depth:8 enabled:true scaling:on origin:(-1352,511) degree:0"'
 alias hor='displayplacer "id:62124958-5E0A-4958-B471-CBEAED2E0F75 res:1920x1080 hz:75 color_depth:8 enabled:true scaling:off origin:(0,0) degree:0" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1352x878 hz:120 color_depth:8 enabled:true scaling:on origin:(-1352,511) degree:0"'
+
+# Shamelessly stolen from:
+# https://github.com/wincent/wincent/blob/358260dc4d1dfda40e7baaadc2fac85ce278cb07/aspects/dotfiles/files/.zsh/exports#L56-L62
+# filename (if known), line number if known, falling back to percent if known,
+# falling back to byte offset, falling back to dash
+export LESSPROMPT='?f%f .?ltLine %lt:?pt%pt\%:?btByte %bt:-...'
+
+# i = case-insensitive searches, unless uppercase characters in search string
+# F = exit immediately if output fits on one screen
+# M = verbose prompt
+# R = ANSI color support
+# X = suppress alternate screen
+# -#.25 = scroll horizontally by quarter of screen width (default is half)
+export LESS="-iFMRX -#.25"
+
+# Color man pages.
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;38;5;208m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[04;38;5;111m'
