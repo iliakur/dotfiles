@@ -1,5 +1,7 @@
 export DD_GITHUB_USER=iliakur
 export DD_GITLAB_USER="ilia.kurenkov"
 export DD_GITLAB_TOKEN="{{ onepasswordRead "op://Private/gitlab-api-token/credential" }}"
+# datadog-agent tooling needs this variable
+export GITLAB_TOKEN="${DD_GITLAB_TOKEN}"
 export JIRA_API_TOKEN="{{ onepasswordRead "op://Private/jira-api-token/credential" }}"
 export JIRA_EMAIL=ilia.kurenkov@datadoghq.com
