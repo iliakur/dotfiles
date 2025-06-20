@@ -167,6 +167,11 @@ ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
 export GITHUB_USER=iliakur
 export GITHUB_TOKEN="{{ onepasswordRead "op://Private/personal-github-token/credential" }}"
 
+# ddqa github account
+export DDQA_GITHUB_USER="${GITHUB_USER}"
+# Referring to 'Agent & Integrations' vault by ID, cuz we can't handle the '&' in its name.
+export DDQA_GITHUB_TOKEN="{{ onepasswordRead "op://nq3umxcmxqwardrf6i5pn675ge/ddqa Github access token/credential" }}"
+
 alias k='kubectl'
 alias gm="git machete"
 alias gma='git machete add -y'
