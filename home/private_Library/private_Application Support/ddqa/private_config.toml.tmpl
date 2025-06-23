@@ -1,0 +1,14 @@
+repo = "core"
+cache_dir = ""
+
+[repos.core]
+path = "/Users/ilia.kurenkov/go/src/github.com/DataDog/integrations-core"
+
+[github]
+# We get the username from the envvar, which is shared with other tools.
+# The token is just for ddqa, that's why it's in this config file.
+token = "{{ onepasswordRead "op://nq3umxcmxqwardrf6i5pn675ge/ddqa Github access token/credential" }}"
+
+[jira]
+# We get both username and token from envvars. These are shared with other tools.
+# DDQA requires the [jira] section though, otherwise it prompts to configure the uname+token ¯\_(ツ)_/¯
