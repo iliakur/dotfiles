@@ -165,7 +165,7 @@ export SSH_AUTH_SOCK=$(launchctl asuser $(id -u) launchctl getenv SSH_AUTH_SOCK)
 ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
 
 export GITHUB_USER=iliakur
-export GITHUB_TOKEN="{{ onepasswordRead "op://Private/personal-github-token/credential" }}"
+export GITHUB_TOKEN="{{ onepasswordRead "op://Private/DD fine-grained github token/credential" }}"
 
 alias k='kubectl'
 alias gm="git machete"
