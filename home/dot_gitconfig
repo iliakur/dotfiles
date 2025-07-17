@@ -25,3 +25,54 @@
     path = ~/src/.gitconfig
 [machete "traverse"]
 	push = false
+
+# Dealing with large repos
+[feature]
+  manyFiles = true
+[core]
+  fsmonitor = true
+  # Scott Chacon's recommendation
+  untrackedCache = true
+
+# Scott Chacon's recommendations
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/
+# Recent branches show up first and in column format
+[column]
+  ui = auto
+[branch]
+  sort = -committerdate
+# Version tags sort as tuples of ints, instead of alphanumeric. I.e. 0.5.101 comes AFTER 0.5.10000
+[tag]
+  sort = version:refname
+
+[diff]
+  # More modern diff algorithm
+  algorithm = histogram
+  # Highlight moved code differently than added/removed
+  colorMoved = plain
+  # Use better labels for the 2 versions than "a/" and "b/"
+  mnemonicPrefix = true
+  # Detects file renames. Can slow things down.
+  renames = true
+[push]
+  default = simple
+  autoSetupRemote = true
+  followTags = true
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+
+[commit]
+  # Shows diff instead of list of modified files
+  verbose = true
+[rebase]
+  # Useful for stacked branches
+  updateRefs = true
+
+[maintenance]
+  repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/datadog-agent
+  repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dogweb
+  repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-analytics
+  repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-source
+  repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-go
