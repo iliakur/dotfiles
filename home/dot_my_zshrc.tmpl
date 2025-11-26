@@ -155,7 +155,18 @@ export DD_APP_KEY="{{ onepasswordRead "op://Private/dd-staging-app-key/credentia
 export DDEV_E2E_AGENT_PY2="datadog/agent-dev:nightly-main-py2"
 export DDEV_E2E_AGENT="datadog/agent-dev:nightly-main-py3"
 
-eval "$(direnv hook zsh)"
+
+export DD_GITHUB_USER="${GITHUB_USER}"
+export DD_GITLAB_USER="ilia.kurenkov"
+export DD_GITLAB_TOKEN="{{ onepasswordRead "op://Private/gitlab-api-token/credential" }}"
+# datadog-agent tooling needs this variable
+export GITLAB_TOKEN="${DD_GITLAB_TOKEN}"
+export JIRA_API_TOKEN="{{ onepasswordRead "op://Private/jira-api-token/credential" }}"
+export JIRA_EMAIL=ilia.kurenkov@datadoghq.com
+# ddqa also needs jira credentials and github username
+export DDQA_JIRA_TOKEN="${JIRA_API_TOKEN}"
+export DDQA_JIRA_EMAIL="${JIRA_EMAIL}"
+export DDQA_GITHUB_USER="${GITHUB_USER}"
 
 ## DD ssh key to sign commits
 # Set SSH_AUTH_SOCK to the launchd-managed ssh-agent socket (com.openssh.ssh-agent).
@@ -166,6 +177,7 @@ ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
 
 export GITHUB_USER=iliakur
 export GITHUB_TOKEN="{{ onepasswordRead "op://Private/DD fine-grained github token/credential" }}"
+eval "$(direnv hook zsh)"
 
 alias k='kubectl'
 alias gm="git machete"
