@@ -140,6 +140,9 @@ function tp(){
     iterm2_profile "${newprof}"
 }
 
+export GITHUB_USER=iliakur
+export GITHUB_TOKEN="$(ddtool auth github token)"
+
 # These variables are needed for the declarative docs sync command.
 export CONSUL_CONFIG=$DATADOG_ROOT/consul-config
 export INT_CORE=$DATADOG_ROOT/integrations-core
@@ -171,12 +174,9 @@ export DDQA_GITHUB_USER="${GITHUB_USER}"
 ## DD ssh key to sign commits
 # Set SSH_AUTH_SOCK to the launchd-managed ssh-agent socket (com.openssh.ssh-agent).
 export SSH_AUTH_SOCK=$(launchctl asuser $(id -u) launchctl getenv SSH_AUTH_SOCK)
-
 # Load SSH keys from the keychain if keychain is empty.
 ssh-add -l > /dev/null || ssh-add --apple-load-keychain 2> /dev/null
 
-export GITHUB_USER=iliakur
-export GITHUB_TOKEN="{{ onepasswordRead "op://Private/DD fine-grained github token/credential" }}"
 eval "$(direnv hook zsh)"
 
 alias k='kubectl'
