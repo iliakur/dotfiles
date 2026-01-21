@@ -142,6 +142,8 @@ function tp(){
 
 export GITHUB_USER=iliakur
 export GITHUB_TOKEN="$(ddtool auth github token)"
+ddev config set github.token "$GITHUB_TOKEN"
+
 
 # These variables are needed for the declarative docs sync command.
 export CONSUL_CONFIG=$DATADOG_ROOT/consul-config
