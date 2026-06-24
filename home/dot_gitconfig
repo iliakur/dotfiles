@@ -9,6 +9,11 @@
     insteadOf = https://github.com/
 [url "git@github.com:"]
     insteadOf = https://github.com/
+# Need this to load the right ssh keys for DD-internal github.
+[url "git@github-ddoghq:"]
+    insteadOf = git@github.com:ddoghq/
+[url "ssh://git@github-ddoghq/"]
+    insteadOf = ssh://git@github.com/ddoghq/
 [core]
 	hooksPath = /usr/local/dd/global_hooks
   excludesFile="~/.gitignore"
