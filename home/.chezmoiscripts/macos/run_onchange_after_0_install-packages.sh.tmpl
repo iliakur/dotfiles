@@ -5,47 +5,46 @@ echo "> Running $(basename "$0") "
 set -eufo pipefail
 
 {{ $brews := list
+    "allium"
+    "bash"
+    "colima"
     "direnv"
     "displayplacer"
     "fd"
     "findutils"
     "fzf"
     "gh"
-    "hatch"
     "htop"
+    "jj"
     "jq"
     "kind"
     "pandoc"
     "pinentry-mac"
     "pre-commit"
     "pyenv-virtualenv"
-    # disabled while I figure out how to do Python.
-    # "pyright"
     "ripgrep"
     "shellcheck"
-    "starship"
     "watch"
-    "withgraphite/tap/graphite"
     "yq"
     "zoxide"
     -}}
 
 {{ $casks := list
     "1password/tap/1password-cli"
-    "alfred"
-    "docker"
-    "emacs"
-    "finicky"
+    "alt-tab"
+    "emacs-app"
+    "ghostty"
     "homebrew/cask-fonts/font-fira-code"
     "homebrew/cask-fonts/font-inconsolata"
     "homebrew/cask-fonts/font-linux-biolinum"
-    "iterm2"
     "karabiner-elements"
+    "logseq"
+    "raycast"
     "rectangle"
     "vlc"
     -}}
 
-brew bundle --no-lock --file=/dev/stdin <<EOF
+brew bundle --file=/dev/stdin <<EOF
 {{ range ($brews | sortAlpha | uniq) -}}
 brew "{{ . }}"
 {{ end -}}
