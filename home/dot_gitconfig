@@ -9,13 +9,6 @@
     insteadOf = https://github.com/
 [url "git@github.com:"]
     insteadOf = https://github.com/
-# Need this to load the right ssh keys for DD-internal github.
-[url "git@github-ddoghq:ddoghq/"]
-    insteadOf = git@github.com:ddoghq/
-[url "ssh://git@github-ddoghq/ddoghq/"]
-    insteadOf = ssh://git@github.com/ddoghq/
-[url "ssh://git@github-ddoghq/ddoghq/"]
-    insteadOf = https://github.com/ddoghq/
 [core]
 	hooksPath = /usr/local/dd/global_hooks
   excludesFile="~/.gitignore"
@@ -84,3 +77,5 @@
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-analytics
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-source
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-go
+[include]
+	path = /Users/ilia.kurenkov/.config/datadog/git/config
