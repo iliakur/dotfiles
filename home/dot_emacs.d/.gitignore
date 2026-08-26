@@ -1,6 +1,10 @@
 # Generated from config.org at Emacs startup.
 /config.el
 
+# Editor lock/auto-save files.
+/#*#
+/.#*
+
 # straight.el managed package/build/cache state.
 /straight/*
 !/straight/versions/
