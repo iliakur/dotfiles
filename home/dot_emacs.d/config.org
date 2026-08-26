@@ -1,0 +1,10 @@
+#+title: Emacs Configuration
+
+* Core behavior
+
+#+begin_src emacs-lisp
+;;; config.el --- Generated from config.org -*- lexical-binding: t; -*-
+
+(setq inhibit-startup-screen t)
+(defalias 'yes-or-no-p #'y-or-n-p)
+#+end_src
