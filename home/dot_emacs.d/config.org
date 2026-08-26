@@ -78,6 +78,63 @@
     "p" '(:ignore t :which-key "project")
     "s" '(:ignore t :which-key "search")
     "o" '(:ignore t :which-key "user")))
+
+(use-package recentf
+  :straight nil
+  :config
+  (make-directory (expand-file-name "var" user-emacs-directory) t)
+  (setq recentf-save-file (expand-file-name "var/recentf.eld" user-emacs-directory))
+  (setq recentf-max-menu-items 25)
+  (recentf-mode 1))
+
+(defun ik/switch-to-scratch-buffer ()
+  "Switch to the *scratch* buffer, creating it when necessary."
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*")))
+
+(defun ik/revert-buffer-no-confirm ()
+  "Revert the current buffer without asking for confirmation."
+  (interactive)
+  (revert-buffer :ignore-auto :noconfirm))
+
+(defun ik/rename-current-buffer-file (new-name)
+  "Rename the file visited by the current buffer to NEW-NAME."
+  (interactive
+   (let ((filename (buffer-file-name)))
+     (unless filename
+       (user-error "Current buffer is not visiting a file"))
+     (list (read-file-name "Rename file to: " filename))))
+  (let ((old-name (buffer-file-name)))
+    (if (vc-backend old-name)
+        (vc-rename-file old-name new-name)
+      (rename-file old-name new-name 1)
+      (set-visited-file-name new-name t t))))
+
+(defun ik/copy-current-file-path ()
+  "Copy the current buffer's file path to the kill ring."
+  (interactive)
+  (let ((filename (or (buffer-file-name)
+                      (user-error "Current buffer is not visiting a file"))))
+    (kill-new filename)
+    (message "%s" filename)))
+
+(ik/leader
+  "b b" '(switch-to-buffer :which-key "switch buffer")
+  "b B" '(ibuffer :which-key "ibuffer")
+  "b d" '(kill-current-buffer :which-key "kill buffer")
+  "b k" '(kill-buffer :which-key "kill buffer by name")
+  "b n" '(next-buffer :which-key "next buffer")
+  "b p" '(previous-buffer :which-key "previous buffer")
+  "b R" '(ik/revert-buffer-no-confirm :which-key "revert buffer")
+  "b s" '(ik/switch-to-scratch-buffer :which-key "scratch buffer")
+  "b w" '(read-only-mode :which-key "toggle read-only")
+  "f f" '(find-file :which-key "find file")
+  "f F" '(find-file-at-point :which-key "find file at point")
+  "f r" '(recentf-open-files :which-key "recent files")
+  "f s" '(save-buffer :which-key "save file")
+  "f S" '(write-file :which-key "save file as")
+  "f R" '(ik/rename-current-buffer-file :which-key "rename file")
+  "f y" '(ik/copy-current-file-path :which-key "copy file path"))
 #+end_src
 
 * UI and ergonomics
