@@ -1,0 +1,14 @@
+# Generated from config.org at Emacs startup.
+/config.el
+
+# straight.el managed package/build/cache state.
+/straight/*
+!/straight/versions/
+/straight/versions/*
+!/straight/versions/default.el
+
+# Emacs local/cache state.
+/eln-cache/
+/auto-save-list/
+/transient/
+/var/

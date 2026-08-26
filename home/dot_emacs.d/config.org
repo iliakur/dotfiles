@@ -8,3 +8,96 @@
 (setq inhibit-startup-screen t)
 (defalias 'yes-or-no-p #'y-or-n-p)
 #+end_src
+
+* Evil and keyboard layout
+
+#+begin_src emacs-lisp
+(use-package evil
+  :init
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1)
+
+  ;; Start with the HNEI/Colemak movement that was used most often. Add more
+  ;; layout-specific mappings later only when concrete missing behavior appears.
+  (define-key evil-motion-state-map "n" #'evil-next-visual-line)
+  (define-key evil-motion-state-map "e" #'evil-previous-visual-line)
+  (define-key evil-visual-state-map "n" #'evil-next-visual-line)
+  (define-key evil-visual-state-map "e" #'evil-previous-visual-line)
+
+  ;; Keep mnemonic text objects from the old setup.
+  (define-key evil-inner-text-objects-map "b" #'evil-inner-bracket)
+  (define-key evil-outer-text-objects-map "b" #'evil-a-bracket)
+  (define-key evil-inner-text-objects-map "c" #'evil-inner-paren)
+  (define-key evil-outer-text-objects-map "c" #'evil-a-paren))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-escape
+  :after evil
+  :config
+  (setq evil-escape-key-sequence "hh")
+  (setq evil-escape-delay 0.2)
+  (evil-escape-mode 1))
+
+(use-package evil-surround
+  :after evil
+  :config
+  (global-evil-surround-mode 1)
+  (setq evil-surround-pairs-alist
+        (append '((?c . ("(" . ")"))
+                  (?b . ("[" . "]"))
+                  (?B . ("{" . "}")))
+                evil-surround-pairs-alist)))
+#+end_src
+
+* Leader keys
+
+#+begin_src emacs-lisp
+(use-package general
+  :after evil
+  :config
+  (general-create-definer ik/leader
+    :states '(normal visual motion)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (general-create-definer ik/local-leader
+    :states '(normal visual motion)
+    :prefix ","
+    :global-prefix "C-,")
+
+  (ik/leader
+    "b" '(:ignore t :which-key "buffers")
+    "f" '(:ignore t :which-key "files")
+    "g" '(:ignore t :which-key "git")
+    "p" '(:ignore t :which-key "project")
+    "s" '(:ignore t :which-key "search")
+    "o" '(:ignore t :which-key "user")))
+#+end_src
+
+* UI and ergonomics
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :config
+  (setq which-key-idle-delay 0.4)
+  (which-key-mode 1))
+
+(use-package beacon
+  :after general
+  :config
+  (beacon-mode 1)
+  (ik/leader
+    "o l" '(beacon-blink :which-key "beacon")))
+
+(use-package olivetti
+  :hook
+  ((org-mode markdown-mode text-mode) . olivetti-mode)
+  :config
+  (setq olivetti-body-width 103))
+#+end_src
