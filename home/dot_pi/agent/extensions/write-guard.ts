@@ -19,6 +19,7 @@ const ALLOWED_DIRS: string[] = [
   "/Users/ilia.kurenkov/Documents/rfcs",
   "/Users/ilia.kurenkov/src",
   "/Users/ilia.kurenkov/dd",
+  nodePath.join(nodeOs.homedir(), ".local/share/chezmoi"),
   "/Users/ilia.kurenkov/.pi",
 ];
 
