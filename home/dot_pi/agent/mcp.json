@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "trajectory": {
+      "args": [
+        "mcp"
+      ],
+      "command": "/Users/ilia.kurenkov/.pi/agent/extensions/trajectory/bin/trajectory",
+      "lifecycle": "lazy"
+    }
+  }
+}

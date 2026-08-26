@@ -1,0 +1,10 @@
+{
+  "lastChangelogVersion": "0.78.0",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-5.3-codex",
+  "defaultThinkingLevel": "medium",
+  "theme": "light",
+  "packages": [
+    "npm:pi-mcp-adapter"
+  ]
+}
