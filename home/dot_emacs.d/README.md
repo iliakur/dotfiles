@@ -10,7 +10,7 @@ Lightweight vanilla Emacs configuration managed by chezmoi.
 
 - `early-init.el`: disables package.el startup and basic chrome early.
 - `init.el`: bootstraps `straight.el` and `use-package`, then loads the tangled config.
-- `config.org`: core behavior, Evil/Colemak movement, leader keys, Which-Key, Beacon, Olivetti, Vertico/Orderless/Consult completion and search, Embark actions, Corfu/Cape in-buffer completion, and project.el bindings.
+- `config.org`: core behavior, Evil/Colemak movement, leader keys, Which-Key, Beacon, Olivetti, Vertico/Orderless/Consult completion and search, Embark actions, Corfu/Cape in-buffer completion, project.el bindings, Magit/git-link, Yasnippet, Tree-sitter, and Python editing support.
 - `straight/versions/default.el`: frozen package revisions for this milestone.
 - `.gitignore`: excludes generated `config.el` and straight.el build/cache state.
 
@@ -18,3 +18,16 @@ Lightweight vanilla Emacs configuration managed by chezmoi.
 
 The generated `config.el` and package/build/cache directories are intentionally
 not tracked.
+
+## External dependencies
+
+General navigation and search expect `git` and `ripgrep`.
+
+Python support uses built-in `python`, `eglot`, and `flymake`, plus Corfu/Cape
+completion from the main config. For a full Python workflow, install:
+
+- Python
+- `pyright` or `basedpyright` for `pyright-langserver`/`basedpyright-langserver`
+- `ruff`
+- `black`
+- `pytest`

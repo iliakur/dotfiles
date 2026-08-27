@@ -296,6 +296,81 @@
 
 (use-package treesit-auto
   :config
-  (setq treesit-auto-install 'prompt)
+  (setq treesit-auto-install (unless noninteractive 'prompt))
   (global-treesit-auto-mode 1))
+#+end_src
+
+* Programming
+
+#+begin_src emacs-lisp
+(use-package apheleia
+  :config
+  (apheleia-global-mode 1))
+#+end_src
+
+** Python
+
+#+begin_src emacs-lisp
+(defun ik/python-language-server-command ()
+  "Return the preferred available Python language server command."
+  (cond
+   ((executable-find "basedpyright-langserver")
+    '("basedpyright-langserver" "--stdio"))
+   ((executable-find "pyright-langserver")
+    '("pyright-langserver" "--stdio"))
+   ((executable-find "pylsp")
+    '("pylsp"))))
+
+(defun ik/python-eglot-ensure ()
+  "Start Eglot for Python when a language server is installed."
+  (interactive)
+  (if (ik/python-language-server-command)
+      (eglot-ensure)
+    (message "No Python language server found; install basedpyright or pyright for Eglot.")))
+
+(use-package eglot
+  :straight nil
+  :config
+  (let ((server-command (ik/python-language-server-command)))
+    (when server-command
+      (add-to-list 'eglot-server-programs
+                   `((python-mode python-ts-mode) . ,server-command)))))
+
+(use-package flymake
+  :straight nil)
+
+(defun ik/python-toggle-bool ()
+  "Toggle the Python boolean at point between True and False."
+  (interactive)
+  (let* ((bounds (bounds-of-thing-at-point 'word))
+         (bool (and bounds
+                    (buffer-substring-no-properties (car bounds) (cdr bounds)))))
+    (unless (member bool '("True" "False"))
+      (user-error "Point is not on a Python boolean"))
+    (delete-region (car bounds) (cdr bounds))
+    (insert (if (string= bool "True") "False" "True"))))
+
+(defun ik/python-copy-function-name ()
+  "Copy the name of the enclosing Python function to the kill ring."
+  (interactive)
+  (let ((defun-name (python-info-current-defun)))
+    (unless defun-name
+      (user-error "Point is not inside a Python function"))
+    (let ((function-name (car (last (split-string defun-name "\\.")))))
+      (kill-new function-name)
+      (message "%s" function-name))))
+
+(use-package python
+  :straight nil
+  :hook
+  ((python-mode python-ts-mode) . ik/python-eglot-ensure)
+  :config
+  (ik/local-leader
+    :keymaps '(python-mode-map python-ts-mode-map)
+    "o b" '(ik/python-toggle-bool :which-key "toggle bool")
+    "o c" '(ik/python-copy-function-name :which-key "copy function name")
+    "n u" '(python-nav-backward-up-list :which-key "up list")
+    "n f a" '(python-nav-forward-defun :which-key "next defun")
+    "n f e" '(python-nav-backward-defun :which-key "previous defun")
+    "n f m" '(python-nav-if-name-main :which-key "if __main__")))
 #+end_src
