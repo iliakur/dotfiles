@@ -72,6 +72,7 @@
     :global-prefix "C-,")
 
   (ik/leader
+    "U" '(universal-argument :which-key "universal argument")
     "b" '(:ignore t :which-key "buffers")
     "f" '(:ignore t :which-key "files")
     "g" '(:ignore t :which-key "git")
