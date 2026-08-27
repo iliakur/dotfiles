@@ -287,3 +287,15 @@
   (setq yas-triggers-in-field t)
   (yas-global-mode 1))
 #+end_src
+
+* Tree-sitter
+
+#+begin_src emacs-lisp
+(use-package treesit
+  :straight nil)
+
+(use-package treesit-auto
+  :config
+  (setq treesit-auto-install 'prompt)
+  (global-treesit-auto-mode 1))
+#+end_src

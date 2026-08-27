@@ -28,6 +28,7 @@
  ("solarized-emacs" . "1443d6dce378ad2d65a8a8c45d5279481a79dfab")
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
  ("transient" . "9ac2d48909e1d34890a4a17581d6693dcc867800")
+ ("treesit-auto" . "c227806dddd4b413009a453c450285d1123e7d72")
  ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
  ("vertico" . "28ce8158a0302fbcf5c094ec708f2dff43f8a058")
  ("with-editor" . "d6d859f7839a2ced6700857976270be56cd225b0")
