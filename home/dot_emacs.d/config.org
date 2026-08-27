@@ -374,3 +374,37 @@
     "n f e" '(python-nav-backward-defun :which-key "previous defun")
     "n f m" '(python-nav-if-name-main :which-key "if __main__")))
 #+end_src
+
+** Elm
+
+#+begin_src emacs-lisp
+(defun ik/elm-language-server-command ()
+  "Return the preferred available Elm language server command."
+  (when (executable-find "elm-language-server")
+    '("elm-language-server")))
+
+(defun ik/elm-eglot-ensure ()
+  "Start Eglot for Elm when a language server is installed."
+  (interactive)
+  (if (ik/elm-language-server-command)
+      (eglot-ensure)
+    (message "No Elm language server found; install elm-language-server for Eglot.")))
+
+(with-eval-after-load 'eglot
+  (let ((server-command (ik/elm-language-server-command)))
+    (when server-command
+      (add-to-list 'eglot-server-programs
+                   `(elm-mode . ,server-command)))))
+
+(use-package elm-mode
+  :mode "\\.elm\\'"
+  :hook
+  (elm-mode . ik/elm-eglot-ensure)
+  :config
+  (when (executable-find "elm-format")
+    (with-eval-after-load 'apheleia
+      (setf (alist-get 'elm-format apheleia-formatters)
+            '("elm-format" "--stdin" "--yes"))
+      (setf (alist-get 'elm-mode apheleia-mode-alist)
+            'elm-format))))
+#+end_src
