@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Emacs mode header for current major mode
+# key: modehdr
+# --
+`comment-start`-*- mode: `mode-name` -*-

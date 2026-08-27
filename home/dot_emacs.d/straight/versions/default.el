@@ -29,5 +29,6 @@
  ("transient" . "9ac2d48909e1d34890a4a17581d6693dcc867800")
  ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
  ("vertico" . "28ce8158a0302fbcf5c094ec708f2dff43f8a058")
- ("with-editor" . "d6d859f7839a2ced6700857976270be56cd225b0"))
+ ("with-editor" . "d6d859f7839a2ced6700857976270be56cd225b0")
+ ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37"))
 :epsilon

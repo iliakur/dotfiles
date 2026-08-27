@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: pytest mark
+# key: mark
+# --
+@pytest.mark.${skip}

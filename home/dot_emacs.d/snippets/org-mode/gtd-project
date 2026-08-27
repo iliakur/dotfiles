@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: GTD-style project starter.
+# key: <gtdpr
+# --
+* Purpose
+  /Why are we doing this?/
+
+$0
+
+* Principles
+  /We can do whatever we want as long as.../
+
+  - $1
+
+* Outcome
+
+
+* Brainstorm
+
+
+* Organizing

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Return Type annotation
+# key: rt
+# --
+ -> ${0}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Retresco Release Header
+# key: rrh
+# --
+${1:version} - `(format-time-string "%Y-%m-%d")`$0

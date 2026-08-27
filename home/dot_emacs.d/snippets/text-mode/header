@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Underlined header
+# key: ulhead
+# --
+${1:Title}
+${1:$(make-string (string-width yas-text) ?\=)}
+$0

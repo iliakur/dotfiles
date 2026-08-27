@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: pytest parametrized function
+# key: testpf
+# --
+@pytest.mark.parametrize(
+    "${1:params}",
+    [],
+)
+def test_${fun}($1):
+    ${assert False}

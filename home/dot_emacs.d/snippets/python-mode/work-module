@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Python module for work
+# key: wmod
+# --
+$1
+cprt$2
+d$2

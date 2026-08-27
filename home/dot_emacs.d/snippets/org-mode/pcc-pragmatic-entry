@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: pcc pragmatic entry annotation
+# key: <pr
+# --
+** $0
+   Errata:
+*** Core message & purpose
+
+*** Issues with original annotation
+
+*** Decisions Made
+
+*** Undecided

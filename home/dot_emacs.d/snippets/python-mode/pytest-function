@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pytest function
+# key: testf
+# --
+def test_${fun}(${fixtures}):
+    ${assert False}

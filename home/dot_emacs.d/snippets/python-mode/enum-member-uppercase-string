@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Enum Member Uppercase String
+# key: emus
+# --
+${1:$$(upcase yas-text)} = "$1"

@@ -241,3 +241,14 @@
   "o g" '(:ignore t :which-key "git")
   "o g b" '(ik/magit-copy-current-branch :which-key "copy branch"))
 #+end_src
+
+* Snippets
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :config
+  (setq yas-snippet-dirs
+        (list (expand-file-name "snippets" user-emacs-directory)))
+  (setq yas-triggers-in-field t)
+  (yas-global-mode 1))
+#+end_src

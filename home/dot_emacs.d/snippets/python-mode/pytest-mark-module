@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Pytest mark module
+# key: markm
+# --
+pytestmark = pytest.mark.${skip}
