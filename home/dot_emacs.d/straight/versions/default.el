@@ -25,6 +25,7 @@
  ("olivetti" . "d2ccae56b442d9c5b06dd2481057abbd7eb82551")
  ("orderless" . "f4a8114ed729d34d35cec6c7eb34b5d0b23aaa6f")
  ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00")
+ ("solarized-emacs" . "1443d6dce378ad2d65a8a8c45d5279481a79dfab")
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
  ("transient" . "9ac2d48909e1d34890a4a17581d6693dcc867800")
  ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")

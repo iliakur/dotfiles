@@ -141,6 +141,37 @@
 * UI and ergonomics
 
 #+begin_src emacs-lisp
+(defun ik/apply-fonts (&optional frame)
+  "Apply preferred fonts to FRAME, when they are installed."
+  (when (display-graphic-p frame)
+    (with-selected-frame (or frame (selected-frame))
+      (when (find-font (font-spec :family "Inconsolata"))
+        (set-face-attribute 'default nil
+                            :family "Inconsolata"
+                            :height 140
+                            :weight 'normal
+                            :width 'normal)
+        (set-face-attribute 'fixed-pitch nil
+                            :family "Inconsolata"
+                            :height 140))
+      (let ((variable-pitch-family
+             (if (eq system-type 'darwin)
+                 "Linux Biolinum"
+               "Linux Biolinum O")))
+        (when (find-font (font-spec :family variable-pitch-family))
+          (set-face-attribute 'variable-pitch nil
+                              :family variable-pitch-family
+                              :height (if (eq system-type 'darwin) 180 140)))))))
+
+(ik/apply-fonts)
+(add-hook 'after-make-frame-functions #'ik/apply-fonts)
+(add-hook 'text-mode-hook #'variable-pitch-mode)
+
+(use-package solarized-theme
+  :config
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme 'solarized-light t))
+
 (use-package which-key
   :config
   (setq which-key-idle-delay 0.4)
