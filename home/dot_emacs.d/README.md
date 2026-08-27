@@ -10,7 +10,7 @@ Lightweight vanilla Emacs configuration managed by chezmoi.
 
 - `early-init.el`: disables package.el startup and basic chrome early.
 - `init.el`: bootstraps `straight.el` and `use-package`, then loads the tangled config.
-- `config.org`: core behavior, Evil/Colemak movement, leader keys, Which-Key, Beacon, and Olivetti.
+- `config.org`: core behavior, Evil/Colemak movement, leader keys, Which-Key, Beacon, Olivetti, Vertico/Orderless/Consult completion and search, Embark actions, Corfu/Cape in-buffer completion, and project.el bindings.
 - `straight/versions/default.el`: frozen package revisions for this milestone.
 - `.gitignore`: excludes generated `config.el` and straight.el build/cache state.
 

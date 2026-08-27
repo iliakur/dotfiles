@@ -159,3 +159,57 @@
   :config
   (setq olivetti-body-width 103))
 #+end_src
+
+* Completion and search
+
+#+begin_src emacs-lisp
+(use-package vertico
+  :config
+  (vertico-mode 1))
+
+(use-package orderless
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles basic partial-completion)))))
+
+(use-package marginalia
+  :config
+  (marginalia-mode 1))
+
+(use-package consult)
+
+;; Embark loads this integration package automatically when Consult is present;
+;; declaring it first ensures straight.el adds it to `load-path` in time.
+(use-package embark-consult
+  :defer t)
+
+(use-package embark)
+
+(use-package corfu
+  :config
+  (global-corfu-mode 1))
+
+(use-package cape)
+
+(ik/leader
+  "SPC" '(execute-extended-command :which-key "M-x")
+  "f f" '(find-file :which-key "find file")
+  "f s" '(save-buffer :which-key "save buffer")
+  "b b" '(consult-buffer :which-key "switch buffer")
+  "s s" '(consult-line :which-key "search line")
+  "s p" '(consult-ripgrep :which-key "search project"))
+#+end_src
+
+* Projects
+
+#+begin_src emacs-lisp
+(use-package project
+  :straight nil)
+
+(ik/leader
+  "p p" '(project-switch-project :which-key "switch project")
+  "p f" '(project-find-file :which-key "project file")
+  "p b" '(project-switch-to-buffer :which-key "project buffer")
+  "p s" '(consult-ripgrep :which-key "project search"))
+#+end_src
