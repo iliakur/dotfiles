@@ -422,3 +422,53 @@
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch))
 #+end_src
+
+* Utilities
+
+#+begin_src emacs-lisp
+(defun ik/insert-file-name (filename &optional args)
+  "Insert name of file FILENAME into buffer after point.
+
+With a universal prefix argument, insert the expanded absolute file name.
+With a negative prefix argument, insert the file name relative to
+`default-directory'.  With no prefix argument, insert FILENAME exactly as it was
+chosen in the minibuffer."
+  (interactive "*fInsert file name: \nP")
+  (cond
+   ((eq '- args)
+    (insert (file-relative-name filename)))
+   ((not (null args))
+    (insert (expand-file-name filename)))
+   (t
+    (insert filename))))
+
+(defun ik/insert-from-env ()
+  "Insert the value of an environment variable selected in the minibuffer."
+  (interactive)
+  (insert (call-interactively #'getenv)))
+
+(defun ik/add-number-grouping ()
+  "Add comma grouping to the number at point."
+  (interactive)
+  (let ((num (thing-at-point 'word))
+        (op ",")
+        (bounds (bounds-of-thing-at-point 'word)))
+    (unless (and num bounds)
+      (user-error "No number at point"))
+    (delete-region (car bounds) (cdr bounds))
+    (while (string-match "\\(.*[0-9]\\)\\([0-9][0-9][0-9].*\\)" num)
+      (setq num
+            (concat
+             (match-string 1 num)
+             op
+             (match-string 2 num))))
+    (insert (format "%s" num))))
+
+(defalias 'ik-add-number-grouping #'ik/add-number-grouping)
+
+(ik/leader
+  "o i" '(:ignore t :which-key "insert")
+  "o i e" '(ik/insert-from-env :which-key "environment variable")
+  "o i f" '(ik/insert-file-name :which-key "file name")
+  "o n" '(ik/add-number-grouping :which-key "add number grouping"))
+#+end_src
