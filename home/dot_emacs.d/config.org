@@ -213,3 +213,31 @@
   "p b" '(project-switch-to-buffer :which-key "project buffer")
   "p s" '(consult-ripgrep :which-key "project search"))
 #+end_src
+
+* Git
+
+#+begin_src emacs-lisp
+(use-package magit)
+
+(use-package git-link
+  :config
+  (setq git-link-use-commit t))
+
+(defun ik/magit-copy-current-branch ()
+  "Show the current branch in the echo-area and add it to the kill ring."
+  (interactive)
+  (let ((branch (magit-get-current-branch)))
+    (if branch
+        (progn
+          (kill-new branch)
+          (message "%s" branch))
+      (user-error "There is no current branch"))))
+
+(ik/leader
+  "g b" '(magit-blame-addition :which-key "blame")
+  "g s" '(magit-status :which-key "status")
+  "g l" '(git-link :which-key "copy link")
+  "g L" '(git-link-commit :which-key "copy commit link")
+  "o g" '(:ignore t :which-key "git")
+  "o g b" '(ik/magit-copy-current-branch :which-key "copy branch"))
+#+end_src
