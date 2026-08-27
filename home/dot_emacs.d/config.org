@@ -72,11 +72,13 @@
     :global-prefix "C-,")
 
   (ik/leader
+    "TAB" '(previous-buffer :which-key "previous buffer")
     "U" '(universal-argument :which-key "universal argument")
     "b" '(:ignore t :which-key "buffers")
     "f" '(:ignore t :which-key "files")
     "g" '(:ignore t :which-key "git")
     "p" '(:ignore t :which-key "project")
+    "q" '(:ignore t :which-key "quit")
     "s" '(:ignore t :which-key "search")
     "o" '(:ignore t :which-key "user")))
 
@@ -135,7 +137,9 @@
   "f s" '(save-buffer :which-key "save file")
   "f S" '(write-file :which-key "save file as")
   "f R" '(ik/rename-current-buffer-file :which-key "rename file")
-  "f y" '(ik/copy-current-file-path :which-key "copy file path"))
+  "f y" '(ik/copy-current-file-path :which-key "copy file path")
+  "q f" '(delete-frame :which-key "close frame")
+  "q q" '(save-buffers-kill-terminal :which-key "quit emacs"))
 #+end_src
 
 * UI and ergonomics
