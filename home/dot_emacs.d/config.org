@@ -408,3 +408,17 @@
       (setf (alist-get 'elm-mode apheleia-mode-alist)
             'elm-format))))
 #+end_src
+
+* Minimal Org
+
+#+begin_src emacs-lisp
+(use-package org
+  :straight nil
+  :config
+  (setq org-special-ctrl-a/e t)
+  (setq org-log-into-drawer t)
+  (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch))
+#+end_src
