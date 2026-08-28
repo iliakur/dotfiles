@@ -1,4 +1,6 @@
-(("apheleia" . "5789d6066aea23c5dd669372c5081ab55dec6f5a")
+(("ace-window" . "77115afc1b0b9f633084cf7479c767988106c196")
+ ("apheleia" . "5789d6066aea23c5dd669372c5081ab55dec6f5a")
+ ("avy" . "933d1f36cca0f71e4acb5fac707e9ae26c536264")
  ("beacon" . "85261a928ae0ec3b41e639f05291ffd6bf7c231c")
  ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
  ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd")

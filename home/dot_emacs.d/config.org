@@ -74,12 +74,16 @@
   (ik/leader
     "TAB" '(previous-buffer :which-key "previous buffer")
     "U" '(universal-argument :which-key "universal argument")
+    "u" '(universal-argument :which-key "universal argument")
     "b" '(:ignore t :which-key "buffers")
+    "F" '(:ignore t :which-key "frames")
     "f" '(:ignore t :which-key "files")
     "g" '(:ignore t :which-key "git")
+    "j" '(:ignore t :which-key "jump")
     "p" '(:ignore t :which-key "project")
     "q" '(:ignore t :which-key "quit")
     "s" '(:ignore t :which-key "search")
+    "w" '(:ignore t :which-key "windows")
     "o" '(:ignore t :which-key "user")))
 
 (use-package recentf
@@ -113,33 +117,553 @@
       (rename-file old-name new-name 1)
       (set-visited-file-name new-name t t))))
 
-(defun ik/copy-current-file-path ()
-  "Copy the current buffer's file path to the kill ring."
+(defun ik/copy-current-file-path (&optional style)
+  "Copy information about the current file to the kill ring.
+STYLE may be `path', `line', `line-column', `directory', `name', or
+`name-sans-extension'."
+  (interactive)
+  (let* ((filename (or (buffer-file-name)
+                       (user-error "Current buffer is not visiting a file")))
+         (text (pcase (or style 'path)
+                 ('line (format "%s:%d" filename (line-number-at-pos)))
+                 ('line-column (format "%s:%d:%d" filename
+                                       (line-number-at-pos)
+                                       (current-column)))
+                 ('directory (file-name-directory filename))
+                 ('name (file-name-nondirectory filename))
+                 ('name-sans-extension
+                  (file-name-sans-extension (file-name-nondirectory filename)))
+                 (_ filename))))
+    (kill-new text)
+    (message "%s" text)))
+
+(defun ik/copy-current-directory-path ()
+  "Copy the current buffer's directory path to the kill ring."
+  (interactive)
+  (let ((directory (expand-file-name default-directory)))
+    (kill-new directory)
+    (message "%s" directory)))
+
+(defun ik/copy-current-file-path-with-line ()
+  "Copy the current file path with line number to the kill ring."
+  (interactive)
+  (ik/copy-current-file-path 'line))
+
+(defun ik/copy-current-file-path-with-line-column ()
+  "Copy the current file path with line and column number to the kill ring."
+  (interactive)
+  (ik/copy-current-file-path 'line-column))
+
+(defun ik/copy-current-file-name ()
+  "Copy the current file name to the kill ring."
+  (interactive)
+  (ik/copy-current-file-path 'name))
+
+(defun ik/copy-current-file-name-sans-extension ()
+  "Copy the current file name without extension to the kill ring."
+  (interactive)
+  (ik/copy-current-file-path 'name-sans-extension))
+
+(defvar ik/killed-file-buffers nil
+  "Recently killed file buffers, newest first.")
+
+(defun ik/remember-killed-file-buffer ()
+  "Remember the file visited by the current buffer before it is killed."
+  (when-let* ((filename (buffer-file-name)))
+    (push filename ik/killed-file-buffers)))
+
+(add-hook 'kill-buffer-hook #'ik/remember-killed-file-buffer)
+
+(defun ik/reopen-killed-file-buffer ()
+  "Reopen the most recently killed file buffer."
+  (interactive)
+  (while (and ik/killed-file-buffers
+              (not (file-exists-p (car ik/killed-file-buffers))))
+    (pop ik/killed-file-buffers))
+  (if-let* ((filename (pop ik/killed-file-buffers)))
+      (find-file filename)
+    (user-error "No killed file buffer to reopen")))
+
+(defun ik/kill-current-buffer-and-window ()
+  "Kill the current buffer and delete its window."
+  (interactive)
+  (let ((window (selected-window)))
+    (kill-current-buffer)
+    (when (and (window-live-p window) (not (one-window-p t)))
+      (delete-window window))))
+
+(defun ik/kill-other-buffers ()
+  "Kill all other file-visiting buffers."
+  (interactive)
+  (let ((current (current-buffer)))
+    (mapc (lambda (buffer)
+            (when (and (not (eq buffer current))
+                       (buffer-file-name buffer))
+              (kill-buffer buffer)))
+          (buffer-list))))
+
+(defun ik/kill-buffers-matching-regexp (regexp)
+  "Kill buffers whose names match REGEXP."
+  (interactive "sKill buffers matching regexp: ")
+  (mapc (lambda (buffer)
+          (when (string-match-p regexp (buffer-name buffer))
+            (kill-buffer buffer)))
+        (buffer-list)))
+
+(defun ik/kill-other-buffers-and-windows ()
+  "Kill all other buffers and delete all other windows."
+  (interactive)
+  (ik/kill-other-buffers)
+  (delete-other-windows))
+
+(defun ik/erase-buffer-confirm ()
+  "Erase the current buffer after confirmation."
+  (interactive)
+  (when (yes-or-no-p (format "Erase buffer %s? " (buffer-name)))
+    (erase-buffer)))
+
+(defun ik/switch-to-help-buffer ()
+  "Open or select the *Help* buffer."
+  (interactive)
+  (pop-to-buffer (get-buffer-create "*Help*")))
+
+(defun ik/replace-buffer-with-clipboard ()
+  "Replace the current buffer contents with the latest kill-ring entry."
+  (interactive)
+  (erase-buffer)
+  (yank))
+
+(defun ik/copy-whole-buffer ()
+  "Copy the whole buffer to the kill ring."
+  (interactive)
+  (kill-new (buffer-substring-no-properties (point-min) (point-max)))
+  (message "Copied buffer %s" (buffer-name)))
+
+(defun ik/new-empty-buffer (&optional side)
+  "Create a new empty buffer, optionally in a new window on SIDE."
+  (let ((buffer (generate-new-buffer "untitled")))
+    (when side
+      (select-window (split-window (selected-window) nil side)))
+    (switch-to-buffer buffer)
+    (funcall initial-major-mode)))
+
+(defun ik/new-empty-buffer-current-window ()
+  "Create a new empty buffer in the current window."
+  (interactive)
+  (ik/new-empty-buffer))
+
+(defun ik/new-empty-buffer-left ()
+  "Create a new empty buffer in a new window on the left."
+  (interactive)
+  (ik/new-empty-buffer 'left))
+
+(defun ik/new-empty-buffer-below ()
+  "Create a new empty buffer in a new window at the bottom."
+  (interactive)
+  (ik/new-empty-buffer 'below))
+
+(defun ik/new-empty-buffer-above ()
+  "Create a new empty buffer in a new window above."
+  (interactive)
+  (ik/new-empty-buffer 'above))
+
+(defun ik/new-empty-buffer-right ()
+  "Create a new empty buffer in a new window on the right."
+  (interactive)
+  (ik/new-empty-buffer 'right))
+
+(defun ik/copy-current-file (new-name)
+  "Copy the current buffer's file to NEW-NAME."
+  (interactive
+   (let ((filename (or (buffer-file-name)
+                       (user-error "Current buffer is not visiting a file"))))
+     (list (read-file-name "Copy file to: " filename))))
+  (copy-file (buffer-file-name) new-name 1)
+  (message "Copied to %s" new-name))
+
+(defun ik/delete-current-file (&optional no-confirm)
+  "Delete the current file and kill its buffer.
+With NO-CONFIRM, do not ask for confirmation."
+  (interactive "P")
+  (let ((filename (or (buffer-file-name)
+                      (user-error "Current buffer is not visiting a file"))))
+    (when (or no-confirm (yes-or-no-p (format "Delete %s? " filename)))
+      (delete-file filename)
+      (kill-current-buffer)
+      (message "Deleted %s" filename))))
+
+(defun ik/sudo-edit-current-file ()
+  "Edit the current file with TRAMP sudo."
+  (interactive)
+  (let ((filename (or (buffer-file-name)
+                      (read-file-name "Find file as root: "))))
+    (find-alternate-file (concat "/sudo::" filename))))
+
+(defun ik/open-current-file-externally ()
+  "Open the current file with the system default application."
   (interactive)
   (let ((filename (or (buffer-file-name)
                       (user-error "Current buffer is not visiting a file"))))
-    (kill-new filename)
-    (message "%s" filename)))
+    (cond
+     ((eq system-type 'darwin) (call-process "open" nil 0 nil filename))
+     ((eq system-type 'windows-nt) (w32-shell-execute "open" filename))
+     (t (call-process "xdg-open" nil 0 nil filename)))))
+
+(defun ik/hexl-find-current-file ()
+  "Open the current file with Hexl."
+  (interactive)
+  (if-let* ((filename (buffer-file-name)))
+      (hexl-find-file filename)
+    (call-interactively #'hexl-find-file)))
+
+(defun ik/set-buffer-file-coding-system-dos ()
+  "Save the current buffer with DOS line endings."
+  (interactive)
+  (set-buffer-file-coding-system 'undecided-dos t))
+
+(defun ik/set-buffer-file-coding-system-unix ()
+  "Save the current buffer with Unix line endings."
+  (interactive)
+  (set-buffer-file-coding-system 'undecided-unix t))
 
 (ik/leader
   "b b" '(switch-to-buffer :which-key "switch buffer")
   "b B" '(ibuffer :which-key "ibuffer")
   "b d" '(kill-current-buffer :which-key "kill buffer")
+  "b D" '(kill-buffer-and-window :which-key "kill buffer and window")
+  "b C-d" '(ik/kill-other-buffers :which-key "kill other buffers")
+  "b C-D" '(ik/kill-buffers-matching-regexp :which-key "kill buffers by regexp")
+  "b e" '(ik/erase-buffer-confirm :which-key "erase buffer")
+  "b H" '(ik/switch-to-help-buffer :which-key "help buffer")
   "b k" '(kill-buffer :which-key "kill buffer by name")
+  "b m" '((lambda () (interactive) (pop-to-buffer "*Messages*")) :which-key "messages buffer")
+  "b M" '(ik/kill-buffers-matching-regexp :which-key "kill buffers by regexp")
   "b n" '(next-buffer :which-key "next buffer")
+  "b N" '(:ignore t :which-key "new buffer")
+  "b N h" '(ik/new-empty-buffer-left :which-key "new buffer left")
+  "b N C-i" '(clone-indirect-buffer :which-key "indirect buffer")
+  "b N i" '(clone-indirect-buffer :which-key "clone indirect buffer")
+  "b N I" '(clone-indirect-buffer-other-window :which-key "clone indirect other window")
+  "b N j" '(ik/new-empty-buffer-below :which-key "new buffer below")
+  "b N k" '(ik/new-empty-buffer-above :which-key "new buffer above")
+  "b N l" '(ik/new-empty-buffer-right :which-key "new buffer right")
+  "b N n" '(ik/new-empty-buffer-current-window :which-key "new buffer")
   "b p" '(previous-buffer :which-key "previous buffer")
+  "b P" '(ik/replace-buffer-with-clipboard :which-key "replace with clipboard")
   "b R" '(ik/revert-buffer-no-confirm :which-key "revert buffer")
   "b s" '(ik/switch-to-scratch-buffer :which-key "scratch buffer")
+  "b u" '(ik/reopen-killed-file-buffer :which-key "reopen killed file")
   "b w" '(read-only-mode :which-key "toggle read-only")
+  "b x" '(ik/kill-current-buffer-and-window :which-key "kill buffer and window")
+  "b Y" '(ik/copy-whole-buffer :which-key "copy whole buffer")
+  "f A" '(find-alternate-file :which-key "find alternate file")
+  "f b" '(bookmark-jump :which-key "bookmarks")
+  "f c" '(ik/copy-current-file :which-key "copy file")
+  "f C" '(:ignore t :which-key "file coding")
+  "f C d" '(ik/set-buffer-file-coding-system-dos :which-key "unix to dos")
+  "f C u" '(ik/set-buffer-file-coding-system-unix :which-key "dos to unix")
+  "f d" '(ik/delete-current-file :which-key "delete file")
+  "f D" '((lambda () (interactive) (ik/delete-current-file t)) :which-key "delete file no confirm")
+  "f E" '(ik/sudo-edit-current-file :which-key "sudo edit")
   "f f" '(find-file :which-key "find file")
   "f F" '(find-file-at-point :which-key "find file at point")
+  "f h" '(ik/hexl-find-current-file :which-key "hexl file")
+  "f j" '(dired-jump :which-key "dired current file")
+  "f l" '(find-file-literally :which-key "find literally")
+  "f L" '(locate :which-key "locate")
+  "f o" '(ik/open-current-file-externally :which-key "open externally")
   "f r" '(recentf-open-files :which-key "recent files")
   "f s" '(save-buffer :which-key "save file")
-  "f S" '(write-file :which-key "save file as")
+  "f S" '(save-some-buffers :which-key "save all files")
   "f R" '(ik/rename-current-buffer-file :which-key "rename file")
-  "f y" '(ik/copy-current-file-path :which-key "copy file path")
+  "f v" '(:ignore t :which-key "variables")
+  "f v d" '(add-dir-local-variable :which-key "directory variable")
+  "f v f" '(add-file-local-variable :which-key "file local variable")
+  "f v p" '(add-file-local-variable-prop-line :which-key "prop-line variable")
+  "f y" '(:ignore t :which-key "copy path")
+  "f y c" '(ik/copy-current-file-path-with-line-column :which-key "path line column")
+  "f y d" '(ik/copy-current-directory-path :which-key "directory path")
+  "f y l" '(ik/copy-current-file-path-with-line :which-key "path line")
+  "f y n" '(ik/copy-current-file-name :which-key "file name")
+  "f y N" '(ik/copy-current-file-name-sans-extension :which-key "file name no extension")
+  "f y y" '(ik/copy-current-file-path :which-key "file path")
+  "F b" '(switch-to-buffer-other-frame :which-key "buffer other frame")
+  "F B" '(display-buffer-other-frame :which-key "display buffer other frame")
+  "F d" '(delete-frame :which-key "delete frame")
+  "F D" '(delete-other-frames :which-key "delete other frames")
+  "F f" '(find-file-other-frame :which-key "file other frame")
+  "F n" '(make-frame-command :which-key "new frame")
+  "F o" '(other-frame :which-key "other frame")
+  "F O" '(dired-other-frame :which-key "dired other frame")
   "q f" '(delete-frame :which-key "close frame")
   "q q" '(save-buffers-kill-terminal :which-key "quit emacs"))
+#+end_src
+
+* Jumping and windows
+
+#+begin_src emacs-lisp
+(require 'cl-lib)
+(require 'dired-x)
+(require 'windmove)
+(winner-mode 1)
+
+(use-package ace-window)
+(use-package avy)
+(use-package goto-chg)
+
+(defun ik/jump-beginning-of-line ()
+  "Go to the beginning of the line, pushing the previous location to the mark ring."
+  (interactive)
+  (push-mark)
+  (beginning-of-line))
+
+(defun ik/jump-end-of-line ()
+  "Go to the end of the line, pushing the previous location to the mark ring."
+  (interactive)
+  (push-mark)
+  (end-of-line))
+
+(defun ik/jump-unbalanced-parenthesis ()
+  "Jump backward to the enclosing unbalanced parenthesis."
+  (interactive)
+  (backward-up-list))
+
+(defun ik/newline-below-and-indent ()
+  "Move to the next line and indent according to mode rules."
+  (interactive)
+  (end-of-line)
+  (newline-and-indent))
+
+(defun ik/browse-url-at-point ()
+  "Open the URL at point in a browser."
+  (interactive)
+  (browse-url-at-point))
+
+(defun ik/select-window-by-number (number)
+  "Select window NUMBER in the current frame."
+  (interactive "nWindow number: ")
+  (let* ((index (if (zerop number) 9 (1- number)))
+         (window (nth index (window-list nil 'no-minibuf))))
+    (if (window-live-p window)
+        (select-window window)
+      (user-error "No window number %d" number))))
+
+(defun ik/select-window-0 () (interactive) (ik/select-window-by-number 0))
+(defun ik/select-window-1 () (interactive) (ik/select-window-by-number 1))
+(defun ik/select-window-2 () (interactive) (ik/select-window-by-number 2))
+(defun ik/select-window-3 () (interactive) (ik/select-window-by-number 3))
+(defun ik/select-window-4 () (interactive) (ik/select-window-by-number 4))
+(defun ik/select-window-5 () (interactive) (ik/select-window-by-number 5))
+(defun ik/select-window-6 () (interactive) (ik/select-window-by-number 6))
+(defun ik/select-window-7 () (interactive) (ik/select-window-by-number 7))
+(defun ik/select-window-8 () (interactive) (ik/select-window-by-number 8))
+(defun ik/select-window-9 () (interactive) (ik/select-window-by-number 9))
+
+(defvar ik/window-configuration-before-maximize nil
+  "Window configuration saved before toggling window maximization.")
+
+(defun ik/window-toggle-maximize ()
+  "Toggle maximization of the selected window."
+  (interactive)
+  (if (and (one-window-p) ik/window-configuration-before-maximize)
+      (progn
+        (set-window-configuration ik/window-configuration-before-maximize)
+        (setq ik/window-configuration-before-maximize nil))
+    (setq ik/window-configuration-before-maximize (current-window-configuration))
+    (delete-other-windows)))
+
+(defun ik/window-split-below-and-focus ()
+  "Split the window horizontally and focus the new window."
+  (interactive)
+  (select-window (split-window-below)))
+
+(defun ik/window-split-right-and-focus ()
+  "Split the window vertically and focus the new window."
+  (interactive)
+  (select-window (split-window-right)))
+
+(defun ik/window-delete-and-kill-buffer ()
+  "Delete the selected window and kill its buffer."
+  (interactive)
+  (let ((buffer (current-buffer)))
+    (unless (one-window-p t)
+      (delete-window))
+    (kill-buffer buffer)))
+
+(defun ik/window-toggle-dedication ()
+  "Toggle whether the selected window is dedicated to its buffer."
+  (interactive)
+  (let ((dedicated (window-dedicated-p)))
+    (set-window-dedicated-p (selected-window) (not dedicated))
+    (message "Window %sdedicated" (if dedicated "no longer " ""))))
+
+(defun ik/window-focus-minibuffer ()
+  "Focus the active minibuffer, if any."
+  (interactive)
+  (if-let* ((window (active-minibuffer-window)))
+      (select-window window)
+    (message "No active minibuffer")))
+
+(defun ik/window-display-messages ()
+  "Display the *Messages* buffer."
+  (interactive)
+  (pop-to-buffer "*Messages*"))
+
+(defun ik/window-rotate-forward ()
+  "Rotate visible window buffers forward."
+  (interactive)
+  (let* ((windows (window-list nil 'no-minibuf))
+         (buffers (mapcar #'window-buffer windows)))
+    (when (> (length windows) 1)
+      (cl-mapcar #'set-window-buffer windows (append (last buffers) (butlast buffers))))))
+
+(defun ik/window-rotate-backward ()
+  "Rotate visible window buffers backward."
+  (interactive)
+  (let* ((windows (window-list nil 'no-minibuf))
+         (buffers (mapcar #'window-buffer windows)))
+    (when (> (length windows) 1)
+      (cl-mapcar #'set-window-buffer windows (append (cdr buffers) (list (car buffers)))))))
+
+(defun ik/window-layout-1 ()
+  "Create a one-window layout."
+  (interactive)
+  (delete-other-windows))
+
+(defun ik/window-layout-2 ()
+  "Create a two-window side-by-side layout."
+  (interactive)
+  (delete-other-windows)
+  (split-window-right)
+  (balance-windows))
+
+(defun ik/window-layout-3 ()
+  "Create a three-window side-by-side layout."
+  (interactive)
+  (delete-other-windows)
+  (split-window-right)
+  (other-window 1)
+  (split-window-right)
+  (other-window -1)
+  (balance-windows))
+
+(defun ik/window-layout-4 ()
+  "Create a four-window grid layout."
+  (interactive)
+  (delete-other-windows)
+  (split-window-right)
+  (split-window-below)
+  (other-window 2)
+  (split-window-below)
+  (other-window -2)
+  (balance-windows))
+
+(defun ik/enlarge-window-horizontally-more ()
+  "Enlarge the selected window horizontally."
+  (interactive)
+  (enlarge-window-horizontally 5))
+
+(defun ik/shrink-window-horizontally-more ()
+  "Shrink the selected window horizontally."
+  (interactive)
+  (shrink-window-horizontally 5))
+
+(defun ik/enlarge-window-vertically-more ()
+  "Enlarge the selected window vertically."
+  (interactive)
+  (enlarge-window 5))
+
+(defun ik/shrink-window-vertically-more ()
+  "Shrink the selected window vertically."
+  (interactive)
+  (shrink-window 5))
+
+(defun ik/maximize-window-horizontally ()
+  "Maximize the selected window horizontally."
+  (interactive)
+  (enlarge-window-horizontally 10000))
+
+(defun ik/maximize-window-vertically ()
+  "Maximize the selected window vertically."
+  (interactive)
+  (enlarge-window 10000))
+
+(ik/leader
+  "0" '(ik/select-window-0 :which-key "window 10")
+  "1" '(ik/select-window-1 :which-key "window 1")
+  "2" '(ik/select-window-2 :which-key "window 2")
+  "3" '(ik/select-window-3 :which-key "window 3")
+  "4" '(ik/select-window-4 :which-key "window 4")
+  "5" '(ik/select-window-5 :which-key "window 5")
+  "6" '(ik/select-window-6 :which-key "window 6")
+  "7" '(ik/select-window-7 :which-key "window 7")
+  "8" '(ik/select-window-8 :which-key "window 8")
+  "9" '(ik/select-window-9 :which-key "window 9")
+  "j 0" '(ik/jump-beginning-of-line :which-key "beginning of line")
+  "j (" '(ik/jump-unbalanced-parenthesis :which-key "unbalanced paren")
+  "j $" '(ik/jump-end-of-line :which-key "end of line")
+  "j b" '(evil-jump-backward :which-key "jump back")
+  "j c" '(goto-last-change :which-key "last change")
+  "j d" '(dired-jump :which-key "current directory")
+  "j D" '(dired-jump-other-window :which-key "current directory other window")
+  "j f" '(find-function :which-key "function definition")
+  "j i" '(consult-imenu :which-key "imenu")
+  "j I" '(consult-imenu-multi :which-key "imenu all buffers")
+  "j j" '(avy-goto-char-timer :which-key "avy char")
+  "j k" '(ik/newline-below-and-indent :which-key "newline and indent")
+  "j l" '(avy-goto-line :which-key "avy line")
+  "j u" '(goto-address-at-point :which-key "url at point")
+  "j U" '(ik/browse-url-at-point :which-key "browse url")
+  "j v" '(find-variable :which-key "variable definition")
+  "j w" '(avy-goto-word-1 :which-key "avy word")
+  "w TAB" '(other-window :which-key "alternate window")
+  "w =" '(balance-windows :which-key "balance windows")
+  "w _" '(ik/maximize-window-horizontally :which-key "maximize horizontally")
+  "w |" '(ik/maximize-window-vertically :which-key "maximize vertically")
+  "w b" '(ik/window-focus-minibuffer :which-key "focus minibuffer")
+  "w c" '(:ignore t :which-key "centering")
+  "w c c" '(olivetti-mode :which-key "toggle centering")
+  "w c C" '(olivetti-mode :which-key "toggle distraction free")
+  "w d" '(delete-window :which-key "delete window")
+  "w D" '(ace-delete-window :which-key "ace delete window")
+  "w t" '(ik/window-toggle-dedication :which-key "toggle dedication")
+  "w f" '(follow-mode :which-key "follow mode")
+  "w F" '(make-frame-command :which-key "new frame")
+  "w h" '(windmove-left :which-key "window left")
+  "w H" '(windmove-swap-states-left :which-key "move window left")
+  "w j" '(windmove-down :which-key "window down")
+  "w J" '(windmove-swap-states-down :which-key "move window down")
+  "w k" '(windmove-up :which-key "window up")
+  "w K" '(windmove-swap-states-up :which-key "move window up")
+  "w l" '(windmove-right :which-key "window right")
+  "w L" '(windmove-swap-states-right :which-key "move window right")
+  "w m" '(ik/window-toggle-maximize :which-key "maximize window")
+  "w M" '(ace-swap-window :which-key "ace swap windows")
+  "w o" '(other-frame :which-key "other frame")
+  "w p" '(:ignore t :which-key "popup")
+  "w p m" '(ik/window-display-messages :which-key "messages popup")
+  "w p p" '(delete-window :which-key "close popup")
+  "w r" '(ik/window-rotate-forward :which-key "rotate forward")
+  "w R" '(ik/window-rotate-backward :which-key "rotate backward")
+  "w s" '(split-window-below :which-key "split below")
+  "w -" '(split-window-below :which-key "split below")
+  "w S" '(ik/window-split-below-and-focus :which-key "split below focus")
+  "w u" '(winner-undo :which-key "undo window layout")
+  "w U" '(winner-redo :which-key "redo window layout")
+  "w v" '(split-window-right :which-key "split right")
+  "w /" '(split-window-right :which-key "split right")
+  "w V" '(ik/window-split-right-and-focus :which-key "split right focus")
+  "w w" '(other-window :which-key "other window")
+  "w W" '(ace-window :which-key "ace window")
+  "w x" '(ik/window-delete-and-kill-buffer :which-key "delete window and buffer")
+  "w [" '(ik/shrink-window-horizontally-more :which-key "shrink horizontally")
+  "w ]" '(ik/enlarge-window-horizontally-more :which-key "enlarge horizontally")
+  "w {" '(ik/shrink-window-vertically-more :which-key "shrink vertically")
+  "w }" '(ik/enlarge-window-vertically-more :which-key "enlarge vertically")
+  "w 1" '(ik/window-layout-1 :which-key "layout 1")
+  "w 2" '(ik/window-layout-2 :which-key "layout 2")
+  "w 3" '(ik/window-layout-3 :which-key "layout 3")
+  "w 4" '(ik/window-layout-4 :which-key "layout 4"))
 #+end_src
 
 * UI and ergonomics
