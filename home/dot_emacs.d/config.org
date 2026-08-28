@@ -83,6 +83,8 @@
     "p" '(:ignore t :which-key "project")
     "q" '(:ignore t :which-key "quit")
     "s" '(:ignore t :which-key "search")
+    "t" '(:ignore t :which-key "toggles")
+    "T" '(:ignore t :which-key "UI toggles")
     "w" '(:ignore t :which-key "windows")
     "o" '(:ignore t :which-key "user")))
 
@@ -326,14 +328,125 @@ With NO-CONFIRM, do not ask for confirmation."
   (interactive)
   (set-buffer-file-coding-system 'undecided-unix t))
 
+(defun ik/kill-visible-buffer (&optional delete-window)
+  "Kill a visible buffer selected with `ace-window'.
+With DELETE-WINDOW, also delete that buffer's window."
+  (interactive "P")
+  (let* ((window (ace-select-window))
+         (buffer (window-buffer window)))
+    (when delete-window
+      (delete-window window))
+    (kill-buffer buffer)))
+
+(defun ik/kill-visible-buffer-and-window ()
+  "Kill a visible buffer selected with `ace-window' and delete its window."
+  (interactive)
+  (ik/kill-visible-buffer t))
+
+(defun ik/open-config-org ()
+  "Open this Emacs configuration's authoritative config.org."
+  (interactive)
+  (find-file (expand-file-name "config.org" user-emacs-directory)))
+
+(defun ik/ediff-config-org-and-el ()
+  "Compare config.org and generated config.el with Ediff."
+  (interactive)
+  (ediff-files (expand-file-name "config.org" user-emacs-directory)
+               (expand-file-name "config.el" user-emacs-directory)))
+
+(defun ik/open-init-el ()
+  "Open this Emacs configuration's init.el."
+  (interactive)
+  (find-file (expand-file-name "init.el" user-emacs-directory)))
+
+(defun ik/open-early-init-el ()
+  "Open this Emacs configuration's early-init.el."
+  (interactive)
+  (find-file (expand-file-name "early-init.el" user-emacs-directory)))
+
+(defun ik/tangle-config-org ()
+  "Tangle config.org into config.el."
+  (interactive)
+  (require 'org)
+  (org-babel-tangle-file (expand-file-name "config.org" user-emacs-directory)
+                         (expand-file-name "config.el" user-emacs-directory)
+                         "emacs-lisp"))
+
+(defun ik/reload-init-file ()
+  "Reload this Emacs configuration."
+  (interactive)
+  (load-file (expand-file-name "init.el" user-emacs-directory)))
+
+(defun ik/update-straight-packages ()
+  "Update straight.el packages."
+  (interactive)
+  (straight-pull-all))
+
+(defun ik/recompile-straight-builds ()
+  "Byte-recompile packages built by straight.el."
+  (interactive)
+  (byte-recompile-directory (expand-file-name "straight/build" user-emacs-directory)
+                            0 t))
+
+(defun ik/copy-emacs-version ()
+  "Display and copy the current Emacs version."
+  (interactive)
+  (let ((version (emacs-version)))
+    (kill-new version)
+    (message "%s" version)))
+
+(defun ik/open-junk-file (extension)
+  "Open a timestamped junk file under ~/junk with EXTENSION."
+  (interactive "sExtension, without dot: ")
+  (let* ((dir (expand-file-name "~/junk/"))
+         (filename (expand-file-name
+                    (format-time-string
+                     (concat "%Y-%m-%d-%H%M%S"
+                             (unless (string= extension "") ".")
+                             extension))
+                    dir)))
+    (make-directory dir t)
+    (find-file filename)))
+
+(defvar ik/file-tree-window nil
+  "Side window used by `ik/toggle-file-tree-sidebar'.")
+
+(defun ik/toggle-file-tree-sidebar ()
+  "Toggle a Dired side window rooted at `default-directory'."
+  (interactive)
+  (if (window-live-p ik/file-tree-window)
+      (progn
+        (delete-window ik/file-tree-window)
+        (setq ik/file-tree-window nil))
+    (setq ik/file-tree-window
+          (display-buffer-in-side-window
+           (dired-noselect default-directory)
+           '((side . left) (slot . -1) (window-width . 0.25))))))
+
+(use-package transient)
+
+(transient-define-prefix ik/buffer-transient ()
+  "Transient for common buffer operations."
+  [["Buffers"
+    ("b" "switch buffer" switch-to-buffer)
+    ("d" "kill buffer" kill-current-buffer)
+    ("C-d" "bury buffer" bury-buffer)
+    ("n" "next buffer" next-buffer)
+    ("p" "previous buffer" previous-buffer)
+    ("o" "other window" other-window)
+    ("x" "kill buffer and window" ik/kill-current-buffer-and-window)
+    ("z" "recenter" recenter-top-bottom)]])
+
 (ik/leader
+  "b ." '(ik/buffer-transient :which-key "buffer transient")
   "b b" '(switch-to-buffer :which-key "switch buffer")
   "b B" '(ibuffer :which-key "ibuffer")
   "b d" '(kill-current-buffer :which-key "kill buffer")
-  "b D" '(kill-buffer-and-window :which-key "kill buffer and window")
+  "b D" '(ik/kill-visible-buffer :which-key "kill visible buffer")
   "b C-d" '(ik/kill-other-buffers :which-key "kill other buffers")
   "b C-D" '(ik/kill-buffers-matching-regexp :which-key "kill buffers by regexp")
   "b e" '(ik/erase-buffer-confirm :which-key "erase buffer")
+  "b h" '(ik/open-config-org :which-key "home buffer")
   "b H" '(ik/switch-to-help-buffer :which-key "help buffer")
   "b k" '(kill-buffer :which-key "kill buffer by name")
   "b m" '((lambda () (interactive) (pop-to-buffer "*Messages*")) :which-key "messages buffer")
@@ -368,6 +481,7 @@ With NO-CONFIRM, do not ask for confirmation."
   "f f" '(find-file :which-key "find file")
   "f F" '(find-file-at-point :which-key "find file at point")
   "f h" '(ik/hexl-find-current-file :which-key "hexl file")
+  "f J" '(ik/open-junk-file :which-key "junk file")
   "f j" '(dired-jump :which-key "dired current file")
   "f l" '(find-file-literally :which-key "find literally")
   "f L" '(locate :which-key "locate")
@@ -376,6 +490,17 @@ With NO-CONFIRM, do not ask for confirmation."
   "f s" '(save-buffer :which-key "save file")
   "f S" '(save-some-buffers :which-key "save all files")
   "f R" '(ik/rename-current-buffer-file :which-key "rename file")
+  "f t" '(ik/toggle-file-tree-sidebar :which-key "file tree")
+  "f e" '(:ignore t :which-key "emacs files")
+  "f e d" '(ik/open-config-org :which-key "config.org")
+  "f e D" '(ik/ediff-config-org-and-el :which-key "ediff config")
+  "f e i" '(ik/open-init-el :which-key "init.el")
+  "f e I" '(ik/open-early-init-el :which-key "early-init.el")
+  "f e l" '(locate-library :which-key "locate library")
+  "f e R" '(ik/tangle-config-org :which-key "tangle config")
+  "f e U" '(ik/update-straight-packages :which-key "update packages")
+  "f e v" '(ik/copy-emacs-version :which-key "emacs version")
+  "f e c" '(ik/recompile-straight-builds :which-key "recompile packages")
   "f v" '(:ignore t :which-key "variables")
   "f v d" '(add-dir-local-variable :which-key "directory variable")
   "f v f" '(add-file-local-variable :which-key "file local variable")
@@ -664,6 +789,183 @@ With NO-CONFIRM, do not ask for confirmation."
   "w 2" '(ik/window-layout-2 :which-key "layout 2")
   "w 3" '(ik/window-layout-3 :which-key "layout 3")
   "w 4" '(ik/window-layout-4 :which-key "layout 4"))
+#+end_src
+
+* GUI toggles
+
+#+begin_src emacs-lisp
+(require 'whitespace)
+
+(defvar ik/whitespace-lines-enabled nil
+  "Whether long-line highlighting is enabled by `ik/toggle-long-line-highlight'.")
+
+(defun ik/toggle-long-line-highlight ()
+  "Toggle highlighting characters past `fill-column'."
+  (interactive)
+  (setq ik/whitespace-lines-enabled (not ik/whitespace-lines-enabled))
+  (setq whitespace-line-column fill-column)
+  (if ik/whitespace-lines-enabled
+      (progn
+        (setq-local whitespace-style '(face lines-tail))
+        (whitespace-mode 1))
+    (whitespace-mode -1)))
+
+(defun ik/global-toggle-long-line-highlight ()
+  "Toggle long-line highlighting globally."
+  (interactive)
+  (setq whitespace-line-column fill-column)
+  (global-whitespace-mode 'toggle))
+
+(defun ik/toggle-syntax-highlighting ()
+  "Toggle syntax highlighting in the current buffer."
+  (interactive)
+  (font-lock-mode 'toggle))
+
+(defun ik/toggle-display-line-numbers ()
+  "Toggle line numbers in the current buffer."
+  (interactive)
+  (display-line-numbers-mode 'toggle))
+
+(defun ik/set-line-numbers-absolute ()
+  "Enable absolute line numbers."
+  (interactive)
+  (setq-local display-line-numbers-type t)
+  (display-line-numbers-mode 1))
+
+(defun ik/set-line-numbers-relative ()
+  "Enable relative line numbers."
+  (interactive)
+  (setq-local display-line-numbers-type 'relative)
+  (display-line-numbers-mode 1))
+
+(defun ik/set-line-numbers-visual ()
+  "Enable visual line numbers."
+  (interactive)
+  (setq-local display-line-numbers-type 'visual)
+  (display-line-numbers-mode 1))
+
+(defun ik/toggle-column-indexing ()
+  "Toggle whether columns are displayed as zero-based or one-based."
+  (interactive)
+  (setq column-number-indicator-zero-based
+        (not column-number-indicator-zero-based))
+  (message "Column numbers are now %s-based"
+           (if column-number-indicator-zero-based "zero" "one")))
+
+(defun ik/toggle-empty-line-fringe-indicators ()
+  "Toggle fringe indicators for empty lines after end of buffer."
+  (interactive)
+  (setq-default indicate-empty-lines (not (default-value 'indicate-empty-lines)))
+  (message "Empty-line fringe indicators %s"
+           (if (default-value 'indicate-empty-lines) "enabled" "disabled")))
+
+(defun ik/toggle-frame-fullscreen ()
+  "Toggle fullscreen state of the selected frame."
+  (interactive)
+  (set-frame-parameter nil 'fullscreen
+                       (unless (eq (frame-parameter nil 'fullscreen) 'fullboth)
+                         'fullboth)))
+
+(defun ik/toggle-frame-maximized ()
+  "Toggle maximized state of the selected frame."
+  (interactive)
+  (set-frame-parameter nil 'fullscreen
+                       (unless (eq (frame-parameter nil 'fullscreen) 'maximized)
+                         'maximized)))
+
+(defvar ik/fringe-visible t
+  "Whether fringes are currently visible.")
+
+(defun ik/toggle-fringe ()
+  "Toggle display of fringes."
+  (interactive)
+  (setq ik/fringe-visible (not ik/fringe-visible))
+  (fringe-mode (if ik/fringe-visible nil 0)))
+
+(defvar ik/frame-alpha 100
+  "Current frame alpha percentage used by transparency commands.")
+
+(defun ik/apply-frame-alpha ()
+  "Apply `ik/frame-alpha' to the selected frame."
+  (set-frame-parameter nil 'alpha-background ik/frame-alpha))
+
+(defun ik/increase-frame-transparency ()
+  "Increase frame transparency."
+  (interactive)
+  (setq ik/frame-alpha (max 20 (- ik/frame-alpha 5)))
+  (ik/apply-frame-alpha)
+  (message "Frame alpha %s" ik/frame-alpha))
+
+(defun ik/decrease-frame-transparency ()
+  "Decrease frame transparency."
+  (interactive)
+  (setq ik/frame-alpha (min 100 (+ ik/frame-alpha 5)))
+  (ik/apply-frame-alpha)
+  (message "Frame alpha %s" ik/frame-alpha))
+
+(defun ik/toggle-frame-transparency ()
+  "Toggle frame transparency between opaque and semi-transparent."
+  (interactive)
+  (setq ik/frame-alpha (if (= ik/frame-alpha 100) 85 100))
+  (ik/apply-frame-alpha)
+  (message "Frame alpha %s" ik/frame-alpha))
+
+(transient-define-prefix ik/transparency-transient ()
+  "Transient for frame transparency."
+  [["Transparency"
+    ("+" "increase" ik/decrease-frame-transparency)
+    ("=" "increase" ik/decrease-frame-transparency)
+    ("k" "increase" ik/decrease-frame-transparency)
+    ("-" "decrease" ik/increase-frame-transparency)
+    ("_" "decrease" ik/increase-frame-transparency)
+    ("j" "decrease" ik/increase-frame-transparency)
+    ("T" "toggle" ik/toggle-frame-transparency)]])
+
+
+(defun ik/toggle-unavailable (feature)
+  "Report that Spacemacs FEATURE has no configured vanilla equivalent."
+  (interactive "sFeature: ")
+  (message "%s toggle is not configured in this vanilla Emacs setup" feature))
+
+(ik/leader
+  "t -" '((lambda () (interactive) (ik/toggle-unavailable "centered cursor")) :which-key "centered cursor")
+  "t C--" '((lambda () (interactive) (ik/toggle-unavailable "global centered cursor")) :which-key "global centered cursor")
+  "t 8" '(ik/toggle-long-line-highlight :which-key "long line highlight")
+  "t C-8" '(ik/global-toggle-long-line-highlight :which-key "global long line highlight")
+  "t a" '(corfu-mode :which-key "completion")
+  "t c" '(subword-mode :which-key "subword mode")
+  "t F" '(auto-fill-mode :which-key "auto-fill")
+  "t f" '(display-fill-column-indicator-mode :which-key "fill column")
+  "t g" '((lambda () (interactive) (ik/toggle-unavailable "golden-ratio")) :which-key "golden-ratio")
+  "t h" '(:ignore t :which-key "highlight")
+  "t h h" '(hl-line-mode :which-key "current line")
+  "t h i" '((lambda () (interactive) (ik/toggle-unavailable "indentation levels")) :which-key "indentation levels")
+  "t h c" '((lambda () (interactive) (ik/toggle-unavailable "indentation column")) :which-key "indentation column")
+  "t h s" '(ik/toggle-syntax-highlighting :which-key "syntax highlighting")
+  "t i" '((lambda () (interactive) (ik/toggle-unavailable "indentation guide")) :which-key "indentation guide")
+  "t C-i" '((lambda () (interactive) (ik/toggle-unavailable "global indentation guide")) :which-key "global indentation guide")
+  "t I" '((lambda () (interactive) (ik/toggle-unavailable "aggressive indent")) :which-key "aggressive indent")
+  "t K" '(which-key-mode :which-key "which-key")
+  "t l" '(toggle-truncate-lines :which-key "truncate lines")
+  "t L" '(visual-line-mode :which-key "visual lines")
+  "t C-S-l" '(global-visual-line-mode :which-key "global visual lines")
+  "t n" '(:ignore t :which-key "line numbers")
+  "t n n" '(ik/toggle-display-line-numbers :which-key "configured line numbers")
+  "t n a" '(ik/set-line-numbers-absolute :which-key "absolute line numbers")
+  "t n r" '(ik/set-line-numbers-relative :which-key "relative line numbers")
+  "t n v" '(pixel-scroll-precision-mode :which-key "smooth scrolling")
+  "t V" '(ik/set-line-numbers-visual :which-key "visual line numbers")
+  "t w" '(whitespace-mode :which-key "whitespace")
+  "t C-w" '(global-whitespace-mode :which-key "global whitespace")
+  "t y" '(yas-minor-mode :which-key "yasnippet")
+  "t z" '(ik/toggle-column-indexing :which-key "column indexing")
+  "T ~" '(ik/toggle-empty-line-fringe-indicators :which-key "empty line fringe")
+  "T F" '(ik/toggle-frame-fullscreen :which-key "fullscreen")
+  "T f" '(ik/toggle-fringe :which-key "fringe")
+  "T m" '(menu-bar-mode :which-key "menu bar")
+  "T M" '(ik/toggle-frame-maximized :which-key "maximize frame")
+  "T t" '(tool-bar-mode :which-key "tool bar")
+  "T T" '(ik/transparency-transient :which-key "transparency"))
 #+end_src
 
 * UI and ergonomics
