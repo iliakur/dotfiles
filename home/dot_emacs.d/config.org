@@ -1449,7 +1449,16 @@ before searching."
 * Git
 
 #+begin_src emacs-lisp
-(use-package magit)
+(use-package magit
+  :config
+  ;; Magit and evil-collection install mode-local navigation bindings, which
+  ;; override the global Colemak-style Evil motion keys.  Keep n/e as line
+  ;; movement in Magit buffers, and move Magit's section navigation to N/E.
+  (evil-define-key '(normal motion visual) magit-mode-map
+    "n" #'evil-next-visual-line
+    "e" #'evil-previous-visual-line
+    "N" #'magit-section-forward
+    "E" #'magit-section-backward))
 
 (use-package git-link
   :config
