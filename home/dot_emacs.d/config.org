@@ -1045,7 +1045,12 @@ With DELETE-WINDOW, also delete that buffer's window."
 (use-package embark-consult
   :defer t)
 
-(use-package embark)
+(use-package embark
+  :config
+  ;; Spacemacs saves Helm/Ivy search results with F3.  In this Consult/Embark
+  ;; setup, F3 exports the current completion/search session to a regular
+  ;; buffer when Embark supports the current candidate type.
+  (define-key minibuffer-local-map (kbd "<f3>") #'embark-export))
 
 (use-package corfu
   :config
@@ -1053,13 +1058,379 @@ With DELETE-WINDOW, also delete that buffer's window."
 
 (use-package cape)
 
+(require 'cl-lib)
+(require 'project)
+(require 'grep)
+(require 'subr-x)
+(require 'url-util)
+
+(defconst ik/search-tool "rg"
+  "The only external search tool used by this configuration.")
+
+(defvar ik/search-history nil
+  "History for external search patterns.")
+
+(defvar ik/search-last-buffer nil
+  "Most recent grep/search results buffer created by `ik/search--run'.")
+
+(defun ik/search--executable ()
+  "Return the ripgrep executable, or signal an error when it is unavailable."
+  (or (executable-find ik/search-tool)
+      (user-error "ripgrep (rg) is not installed")))
+
+(defun ik/search--default-input ()
+  "Return active region text or symbol at point for search defaults."
+  (cond
+   ((use-region-p)
+    (buffer-substring-no-properties (region-beginning) (region-end)))
+   ((thing-at-point 'symbol t))))
+
+(defun ik/search--read-pattern (use-default-input)
+  "Read a search pattern, using point/region when USE-DEFAULT-INPUT is non-nil."
+  (let ((default (and use-default-input (ik/search--default-input))))
+    (read-string (if default
+                     (format "Search for (default %s): " default)
+                   "Search for: ")
+                 nil 'ik/search-history default)))
+
+(defun ik/search--read-extensions (ask)
+  "Read a comma/space-separated extension list when ASK is non-nil."
+  (when ask
+    (let ((input (read-string "Limit to extensions (comma/space-separated, empty for all): ")))
+      (unless (string-empty-p input)
+        (mapcar (lambda (extension)
+                  (string-remove-prefix "." extension))
+                (split-string input "[,[:space:]]+" t))))))
+
+(defun ik/search--extension-args (extensions)
+  "Return ripgrep glob arguments limited to EXTENSIONS."
+  (mapcan (lambda (extension) (list "-g" (concat "*." extension)))
+          extensions))
+
+(defun ik/search--command (pattern targets extensions)
+  "Build a ripgrep command for PATTERN, TARGETS, and EXTENSIONS."
+  (mapconcat #'shell-quote-argument
+             (append (list (ik/search--executable)
+                           "--vimgrep"
+                           "--smart-case"
+                           "--no-heading"
+                           "--color=never")
+                     (ik/search--extension-args extensions)
+                     (list "-e" pattern)
+                     targets)
+             " "))
+
+(defun ik/search--run (scope pattern targets &optional directory extensions)
+  "Run ripgrep for PATTERN over TARGETS in DIRECTORY and remember the result buffer.
+SCOPE is a human-readable scope name used for the result buffer."
+  (unless targets
+    (user-error "No targets for search"))
+  (let* ((default-directory (file-name-as-directory (or directory default-directory)))
+         (command (ik/search--command pattern targets extensions))
+         (buffer-name (format "*rg %s: %s*" scope pattern)))
+    (setq ik/search-last-buffer
+          (compilation-start command 'grep-mode (lambda (_) buffer-name)))))
+
+(defun ik/search-current-file (&optional use-default-input ask-extensions)
+  "Search the current file with ripgrep.
+When USE-DEFAULT-INPUT is non-nil, offer the region or symbol at point as the
+default pattern.  When ASK-EXTENSIONS is non-nil, prompt for file extensions
+before searching."
+  (interactive)
+  (let ((filename (or (buffer-file-name)
+                      (user-error "Current buffer is not visiting a file"))))
+    (ik/search--run "file"
+                    (ik/search--read-pattern use-default-input)
+                    (list filename)
+                    default-directory
+                    (ik/search--read-extensions ask-extensions))))
+
+(defun ik/search-open-buffers (&optional use-default-input ask-extensions)
+  "Search all open file-visiting buffers with ripgrep."
+  (interactive)
+  (ik/search--run "buffers"
+                  (ik/search--read-pattern use-default-input)
+                  (delete-dups
+                   (delq nil (mapcar #'buffer-file-name (buffer-list))))
+                  default-directory
+                  (ik/search--read-extensions ask-extensions)))
+
+(defun ik/search-directory (directory &optional use-default-input ask-extensions)
+  "Search DIRECTORY with ripgrep."
+  (interactive "DSearch directory: ")
+  (let ((root (file-name-as-directory (expand-file-name directory))))
+    (ik/search--run (abbreviate-file-name root)
+                    (ik/search--read-pattern use-default-input)
+                    (list ".")
+                    root
+                    (ik/search--read-extensions ask-extensions))))
+
+(defun ik/search-current-directory (&optional use-default-input ask-extensions)
+  "Search `default-directory' with ripgrep."
+  (interactive)
+  (ik/search-directory default-directory use-default-input ask-extensions))
+
+(defun ik/search-project (&optional use-default-input ask-extensions)
+  "Search the current project with ripgrep."
+  (interactive)
+  (let* ((project (or (project-current)
+                      (user-error "Current buffer is not in a project")))
+         (root (project-root project)))
+    (ik/search-directory root use-default-input ask-extensions)))
+
+(defun ik/search-project-or-current-directory (&optional use-default-input ask-extensions)
+  "Search the current project when available, otherwise `default-directory'."
+  (interactive)
+  (if (project-current)
+      (ik/search-project use-default-input ask-extensions)
+    (ik/search-current-directory use-default-input ask-extensions)))
+
+(defun ik/search-resume ()
+  "Resume the most recent search result buffer."
+  (interactive)
+  (if (buffer-live-p ik/search-last-buffer)
+      (pop-to-buffer ik/search-last-buffer)
+    (user-error "No search buffer to resume")))
+
+(defun ik/search-google (query)
+  "Search Google for QUERY in the default browser."
+  (interactive
+   (list (read-string "Google search: " nil nil (ik/search--default-input))))
+  (browse-url (concat "https://www.google.com/search?q="
+                      (url-hexify-string query))))
+
+(defun ik/search-clear-highlighting ()
+  "Clear persistent Evil search highlighting."
+  (interactive)
+  (cond
+   ((fboundp 'evil-search-highlight-persist-remove-all)
+    (evil-search-highlight-persist-remove-all))
+   ((fboundp 'evil-ex-nohighlight)
+    (evil-ex-nohighlight))
+   ((fboundp 'lazy-highlight-cleanup)
+    (lazy-highlight-cleanup t))))
+
+(use-package evil-search-highlight-persist
+  :after evil
+  :config
+  (global-evil-search-highlight-persist t))
+
+(use-package iedit)
+
+(use-package auto-highlight-symbol
+  :after (evil transient)
+  :init
+  (setq ahs-idle-interval 1.0)
+  :config
+  (defun ik/highlight-symbol--ensure ()
+    "Ensure `auto-highlight-symbol-mode' is active in the current buffer."
+    (unless auto-highlight-symbol-mode
+      (auto-highlight-symbol-mode 1))
+    (ahs-highlight-now))
+
+  (defun ik/highlight-symbol-name ()
+    "Return the active region or symbol at point for symbol actions."
+    (or (ik/search--default-input)
+        (user-error "No symbol at point")))
+
+  (defun ik/highlight-symbol ()
+    "Highlight the current symbol and open the symbol transient."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (ik/highlight-symbol-transient))
+
+  (defun ik/highlight-symbol-forward ()
+    "Highlight the current symbol and jump to its next occurrence."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (ahs-forward)
+    (ik/highlight-symbol-transient))
+
+  (defun ik/highlight-symbol-backward ()
+    "Highlight the current symbol and jump to its previous occurrence."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (ahs-backward)
+    (ik/highlight-symbol-transient))
+
+  (defun ik/highlight-symbol-forward-definition ()
+    "Jump to the next definition occurrence of the highlighted symbol."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (if (fboundp 'ahs-forward-definition)
+        (ahs-forward-definition)
+      (ahs-forward)))
+
+  (defun ik/highlight-symbol-backward-definition ()
+    "Jump to the previous definition occurrence of the highlighted symbol."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (if (fboundp 'ahs-backward-definition)
+        (ahs-backward-definition)
+      (ahs-backward)))
+
+  (defun ik/edit-symbol-occurrences ()
+    "Edit all occurrences of the highlighted symbol."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (cond
+     ((fboundp 'ahs-edit-mode) (ahs-edit-mode))
+     ((fboundp 'iedit-mode) (iedit-mode))
+     (t (user-error "No symbol-editing command is available"))))
+
+  (defun ik/highlight-symbol-change-range ()
+    "Change auto-highlight-symbol range."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (if (fboundp 'ahs-change-range)
+        (call-interactively #'ahs-change-range)
+      (user-error "auto-highlight-symbol range changing is unavailable")))
+
+  (defun ik/highlight-symbol-home ()
+    "Return to the starting highlighted occurrence."
+    (interactive)
+    (ik/highlight-symbol--ensure)
+    (if (fboundp 'ahs-back-to-start)
+        (ahs-back-to-start)
+      (message "No recorded starting occurrence")))
+
+  (defun ik/search-current-buffer-for-symbol ()
+    "Search the current buffer for the symbol at point using Consult."
+    (interactive)
+    (consult-line (ik/highlight-symbol-name)))
+
+  (defun ik/search-open-buffers-for-symbol ()
+    "Search open file-visiting buffers for the symbol at point."
+    (interactive)
+    (ik/search-open-buffers t nil))
+
+  (defun ik/search-files-for-symbol (directory)
+    "Search DIRECTORY for the symbol at point."
+    (interactive "DSearch directory: ")
+    (ik/search-directory directory t nil))
+
+  (defun ik/search-project-for-symbol ()
+    "Search the current project for the symbol at point."
+    (interactive)
+    (ik/search-project t nil))
+
+  (transient-define-prefix ik/highlight-symbol-transient ()
+    "Navigate and act on the highlighted symbol."
+    [["Symbol"
+      ("e" "edit occurrences" ik/edit-symbol-occurrences)
+      ("n" "next occurrence" ahs-forward)
+      ("N" "previous occurrence" ahs-backward)
+      ("p" "previous occurrence" ahs-backward)
+      ("d" "next definition" ik/highlight-symbol-forward-definition)
+      ("D" "previous definition" ik/highlight-symbol-backward-definition)
+      ("r" "change range" ik/highlight-symbol-change-range)
+      ("R" "home occurrence" ik/highlight-symbol-home)
+      ("s" "search buffer" ik/search-current-buffer-for-symbol)
+      ("b" "search buffers" ik/search-open-buffers-for-symbol)
+      ("f" "search files" ik/search-files-for-symbol)
+      ("/" "search project" ik/search-project-for-symbol)
+      ("z" "recenter" recenter-top-bottom)]])
+
+  (define-key evil-normal-state-map (kbd "*") #'ik/highlight-symbol-forward)
+  (define-key evil-normal-state-map (kbd "#") #'ik/highlight-symbol-backward)
+  (define-key evil-motion-state-map (kbd "*") #'ik/highlight-symbol-forward)
+  (define-key evil-motion-state-map (kbd "#") #'ik/highlight-symbol-backward)
+
+  (ik/leader
+    "s e" '(ik/edit-symbol-occurrences :which-key "edit symbol occurrences")
+    "s h" '(ik/highlight-symbol :which-key "highlight symbol")
+    "s H" '(ik/highlight-symbol-home :which-key "last highlighted symbol")
+    "t h a" '(auto-highlight-symbol-mode :which-key "auto highlight symbol")))
+
 (ik/leader
   "SPC" '(execute-extended-command :which-key "M-x")
   "f f" '(find-file :which-key "find file")
   "f s" '(save-buffer :which-key "save buffer")
   "b b" '(consult-buffer :which-key "switch buffer")
-  "s s" '(consult-line :which-key "search line")
-  "s p" '(consult-ripgrep :which-key "search project"))
+  "r" '(:ignore t :which-key "resume")
+  "r l" '(ik/search-resume :which-key "last completion/search")
+  "r s" '(ik/search-resume :which-key "search buffer")
+  "s `" '(evil-jump-backward :which-key "previous search location")
+  "s /" '(ik/search-project-or-current-directory :which-key "search project/dir")
+  "/" '(ik/search-project-or-current-directory :which-key "search project/dir")
+  "*" '((lambda (&optional arg) (interactive "P")
+          (ik/search-project-or-current-directory t arg))
+        :which-key "search symbol project/dir")
+  "s l" '(ik/search-resume :which-key "resume search")
+  "s c" '(ik/search-clear-highlighting :which-key "clear search highlight")
+  "s s" '((lambda (&optional arg) (interactive "P")
+            (ik/search-current-file nil arg))
+          :which-key "rg file")
+  "s S" '((lambda (&optional arg) (interactive "P")
+            (ik/search-current-file t arg))
+          :which-key "rg file default")
+  "s b" '((lambda (&optional arg) (interactive "P")
+            (ik/search-open-buffers nil arg))
+          :which-key "rg buffers")
+  "s B" '((lambda (&optional arg) (interactive "P")
+            (ik/search-open-buffers t arg))
+          :which-key "rg buffers default")
+  "s f" '((lambda (&optional arg) (interactive "P")
+            (call-interactively
+             (lambda (directory)
+               (interactive "DSearch directory: ")
+               (ik/search-directory directory nil arg))))
+          :which-key "rg files")
+  "s F" '((lambda (&optional arg) (interactive "P")
+            (call-interactively
+             (lambda (directory)
+               (interactive "DSearch directory: ")
+               (ik/search-directory directory t arg))))
+          :which-key "rg files default")
+  "s d" '((lambda (&optional arg) (interactive "P")
+            (ik/search-current-directory nil arg))
+          :which-key "rg directory")
+  "s D" '((lambda (&optional arg) (interactive "P")
+            (ik/search-current-directory t arg))
+          :which-key "rg directory default")
+  "s p" '((lambda (&optional arg) (interactive "P")
+            (ik/search-project nil arg))
+          :which-key "rg project")
+  "s P" '((lambda (&optional arg) (interactive "P")
+            (ik/search-project t arg))
+          :which-key "rg project default")
+  "s w g" '(ik/search-google :which-key "google")
+  "s r r" '((lambda (&optional arg) (interactive "P")
+              (ik/search-current-file nil arg))
+            :which-key "rg file")
+  "s r R" '((lambda (&optional arg) (interactive "P")
+              (ik/search-current-file t arg))
+            :which-key "rg file default")
+  "s r b" '((lambda (&optional arg) (interactive "P")
+              (ik/search-open-buffers nil arg))
+            :which-key "rg buffers")
+  "s r B" '((lambda (&optional arg) (interactive "P")
+              (ik/search-open-buffers t arg))
+            :which-key "rg buffers default")
+  "s r f" '((lambda (&optional arg) (interactive "P")
+              (call-interactively
+               (lambda (directory)
+                 (interactive "DSearch directory: ")
+                 (ik/search-directory directory nil arg))))
+            :which-key "rg files")
+  "s r F" '((lambda (&optional arg) (interactive "P")
+              (call-interactively
+               (lambda (directory)
+                 (interactive "DSearch directory: ")
+                 (ik/search-directory directory t arg))))
+            :which-key "rg files default")
+  "s r d" '((lambda (&optional arg) (interactive "P")
+              (ik/search-current-directory nil arg))
+            :which-key "rg directory")
+  "s r D" '((lambda (&optional arg) (interactive "P")
+              (ik/search-current-directory t arg))
+            :which-key "rg directory default")
+  "s r p" '((lambda (&optional arg) (interactive "P")
+              (ik/search-project nil arg))
+            :which-key "rg project")
+  "s r P" '((lambda (&optional arg) (interactive "P")
+              (ik/search-project t arg))
+            :which-key "rg project default"))
 #+end_src
 
 * Projects
