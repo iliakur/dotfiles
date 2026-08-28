@@ -520,8 +520,8 @@ With DELETE-WINDOW, also delete that buffer's window."
   "F n" '(make-frame-command :which-key "new frame")
   "F o" '(other-frame :which-key "other frame")
   "F O" '(dired-other-frame :which-key "dired other frame")
-  "q f" '(delete-frame :which-key "close frame")
-  "q q" '(save-buffers-kill-terminal :which-key "quit emacs"))
+  "q f" '(save-buffers-kill-terminal :which-key "quit this client/frame")
+  "q q" '(save-buffers-kill-emacs :which-key "quit emacs process"))
 #+end_src
 
 * Jumping and windows
