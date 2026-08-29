@@ -39,6 +39,9 @@
   (define-key evil-normal-state-map "l" #'evil-insert)
   (define-key evil-normal-state-map "L" #'evil-insert-line)
 
+  ;; Comment operator: gcc toggles comment on current line.
+  (define-key evil-normal-state-map (kbd "gcc") #'comment-line)
+
   ;; Keep mnemonic text objects from the old setup.
   (define-key evil-inner-text-objects-map "b" #'evil-inner-bracket)
   (define-key evil-outer-text-objects-map "b" #'evil-a-bracket)
