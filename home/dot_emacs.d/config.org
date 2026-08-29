@@ -24,6 +24,20 @@
   (define-key evil-motion-state-map "e" #'evil-previous-visual-line)
   (define-key evil-visual-state-map "n" #'evil-next-visual-line)
   (define-key evil-visual-state-map "e" #'evil-previous-visual-line)
+  (define-key evil-motion-state-map "i" #'evil-forward-char)
+  (define-key evil-visual-state-map "i" #'evil-forward-char)
+  (define-key evil-normal-state-map "i" #'evil-forward-char)
+
+  ;; Compensate for default motions/commands displaced by the n/e/i remap.
+  ;; - n (search next) -> j / J
+  ;; - e (forward word end) -> k / K
+  ;; - i/I (insert / insert at BOL) -> l / L
+  (define-key evil-motion-state-map "j" #'evil-search-next)
+  (define-key evil-motion-state-map "J" #'evil-search-previous)
+  (define-key evil-motion-state-map "k" #'evil-forward-word-end)
+  (define-key evil-motion-state-map "K" #'evil-forward-WORD-end)
+  (define-key evil-normal-state-map "l" #'evil-insert)
+  (define-key evil-normal-state-map "L" #'evil-insert-line)
 
   ;; Keep mnemonic text objects from the old setup.
   (define-key evil-inner-text-objects-map "b" #'evil-inner-bracket)
