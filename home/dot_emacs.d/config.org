@@ -1466,8 +1466,18 @@ before searching."
 * Git
 
 #+begin_src emacs-lisp
+(defun ik/magit-clone-default-directory (repository)
+  "Return clone destination root for REPOSITORY.
+DataDog/ddoghq repositories go under ~/dd; everything else under ~/src."
+  (let ((case-fold-search t))
+    (expand-file-name
+     (if (string-match-p "\\(?:[:/]\\)\\(?:datadog\\|ddoghq\\)/" repository)
+         "~/dd/"
+       "~/src/"))))
+
 (use-package magit
   :config
+  (setq magit-clone-default-directory #'ik/magit-clone-default-directory)
   ;; Magit and evil-collection install mode-local navigation bindings, which
   ;; override the global Colemak-style Evil motion keys.  Keep n/e as line
   ;; movement in Magit buffers, and move Magit's section navigation to N/E.
@@ -1493,6 +1503,7 @@ before searching."
 
 (ik/leader
   "g b" '(magit-blame-addition :which-key "blame")
+  "g c" '(magit-clone-regular :which-key "clone repo")
   "g s" '(magit-status :which-key "status")
   "g l" '(git-link :which-key "copy link")
   "g L" '(git-link-commit :which-key "copy commit link")
