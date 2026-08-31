@@ -1,0 +1,26 @@
+{
+  "skill_name": "edit-writing",
+  "evals": [
+    {
+      "id": 1,
+      "name": "slack-message-critique",
+      "prompt": "I'm about to send this Slack message. Can you edit it? Path: evals/samples/slack-mutation-testing.md",
+      "expected_output": "Terse critique grouped by issue type, no preamble/summary, ends with a mode question (suggest/rewrite/critique-only). Should catch: hedges ('imo', 'I'd vote for'), the 'my :twocents:, not very coherent or pretty:' apologetic opener, the 'them agent' typo at the end, and at least one structural observation (e.g. the fragmented bullet about high-vs-low score distribution).",
+      "files": ["evals/samples/slack-mutation-testing.md"]
+    },
+    {
+      "id": 2,
+      "name": "essay-respect-voice",
+      "prompt": "Please review this draft I've been working on. It's still a work in progress. Path: evals/samples/test-suite-essay.md",
+      "expected_output": "Critique that respects the deliberately conversational voice (e.g. 'we code grunts', 'Aaaand there goes our encapsulation') but flags genuine issues: the duplicate 'mocks mocks' typo, fragmented bullet structure (some lists have stray top-level bullets that should be sub-items), the wandering Sensitivity-vs-Noise priorities argument. Should not try to formalize the tone.",
+      "files": ["evals/samples/test-suite-essay.md"]
+    },
+    {
+      "id": 3,
+      "name": "rfc-scoped-critique",
+      "prompt": "Give me a critique of this RFC. Focus on structural and clarity issues — don't bother listing every passive voice instance, just flag the pattern if you see it. Path: evals/samples/zero-code-rfc.md",
+      "expected_output": "Honors the scope: structural feedback first (e.g. the Overview promises 'two things follow' but the body buries them, the 'Why Rust' section's 'biggest risk' subsection is the only honest counter-argument and should be more prominent, Glossary defines only one term and trails off). Groups passive voice into one bullet rather than enumerating. Doesn't dump full per-section nitpicks.",
+      "files": ["evals/samples/zero-code-rfc.md"]
+    }
+  ]
+}
