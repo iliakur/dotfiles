@@ -1043,6 +1043,9 @@ With DELETE-WINDOW, also delete that buffer's window."
 #+begin_src emacs-lisp
 (use-package vertico
   :config
+  (setq vertico-count 18
+        vertico-resize t
+        max-mini-window-height 0.4)
   (vertico-mode 1))
 
 (use-package orderless
