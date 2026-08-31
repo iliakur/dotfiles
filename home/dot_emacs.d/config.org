@@ -21,7 +21,7 @@
     ;; Start with the HNEI/Colemak movement that was used most often. Add more
     ;; layout-specific mappings later only when concrete missing behavior appears.
     (define-key evil-motion-state-map "n" #'evil-next-visual-line)
-    (define-key evil-motion-state-map "e" #'evil-prev;; ious-visual-line)
+    (define-key evil-motion-state-map "e" #'evil-previous-visual-line)
     (define-key evil-visual-state-map "n" #'evil-next-visual-line)
     (define-key evil-visual-state-map "e" #'evil-previous-visual-line)
     (define-key evil-motion-state-map "i" #'evil-forward-char)
