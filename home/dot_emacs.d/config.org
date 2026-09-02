@@ -9,6 +9,14 @@
 (defalias 'yes-or-no-p #'y-or-n-p)
 #+end_src
 
+* Package management (straight.el)
+
+`straight.el` is bootstrapped in `init.el`, and `(setq straight-use-package-by-default t)` makes `use-package` entries tracked by straight unless overridden.
+
+Notes about lock tracking:
+- Packages marked with `:straight nil` are intentionally not tracked by straight and use the built-in Emacs version.
+- `straight/versions/default.el` records repository pins, so names there may differ from `use-package` names (for example `which-key` comes from repo `emacs-which-key`).
+
 * Evil and keyboard layout
 
 #+begin_src emacs-lisp
