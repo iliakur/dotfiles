@@ -1560,49 +1560,49 @@ before searching."
 * Git
 
 #+begin_src emacs-lisp
-(defun ik/magit-clone-default-directory (repository)
-  "Return clone destination root for REPOSITORY.
-DataDog/ddoghq repositories go under ~/dd; everything else under ~/src."
-  (let ((case-fold-search t))
-    (expand-file-name
-     (if (string-match-p "\\(?:[:/]\\)\\(?:datadog\\|ddoghq\\)/" repository)
-         "~/dd/"
-       "~/src/"))))
+  (defun ik/magit-clone-default-directory (repository)
+    "Return clone destination root for REPOSITORY.
+    DataDog/ddoghq(-sandox) repositories go under ~/dd; everything else under ~/src."
+    (let ((case-fold-search t))
+      (expand-file-name
+       (if (string-match-p "\\(?:[:/]\\)\\(?:datadog\\|ddoghq\\)/" repository)
+           "~/dd/"
+         "~/src/"))))
 
-(use-package magit
-  :config
-  (setq magit-clone-default-directory #'ik/magit-clone-default-directory)
-  ;; Magit and evil-collection install mode-local navigation bindings, which
-  ;; override the global Colemak-style Evil motion keys.  Keep n/e as line
-  ;; movement in Magit buffers, and move Magit's section navigation to N/E.
-  (evil-define-key '(normal motion visual) magit-mode-map
-    "n" #'evil-next-visual-line
-    "e" #'evil-previous-visual-line
-    "N" #'magit-section-forward
-    "E" #'magit-section-backward))
+  (use-package magit
+    :config
+    (setq magit-clone-default-directory #'ik/magit-clone-default-directory)
+    ;; Magit and evil-collection install mode-local navigation bindings, which
+    ;; override the global Colemak-style Evil motion keys.  Keep n/e as line
+    ;; movement in Magit buffers, and move Magit's section navigation to N/E.
+    (evil-define-key '(normal motion visual) magit-mode-map
+      "n" #'evil-next-visual-line
+      "e" #'evil-previous-visual-line
+      "N" #'magit-section-forward
+      "E" #'magit-section-backward))
 
-(use-package git-link
-  :config
-  (setq git-link-use-commit t))
+  (use-package git-link
+    :config
+    (setq git-link-use-commit t))
 
-(defun ik/magit-copy-current-branch ()
-  "Show the current branch in the echo-area and add it to the kill ring."
-  (interactive)
-  (let ((branch (magit-get-current-branch)))
-    (if branch
-        (progn
-          (kill-new branch)
-          (message "%s" branch))
-      (user-error "There is no current branch"))))
+  (defun ik/magit-copy-current-branch ()
+    "Show the current branch in the echo-area and add it to the kill ring."
+    (interactive)
+    (let ((branch (magit-get-current-branch)))
+      (if branch
+          (progn
+            (kill-new branch)
+            (message "%s" branch))
+        (user-error "There is no current branch"))))
 
-(ik/leader
-  "g b" '(magit-blame-addition :which-key "blame")
-  "g c" '(magit-clone-regular :which-key "clone repo")
-  "g s" '(magit-status :which-key "status")
-  "g l" '(git-link :which-key "copy link")
-  "g L" '(git-link-commit :which-key "copy commit link")
-  "o g" '(:ignore t :which-key "git")
-  "o g b" '(ik/magit-copy-current-branch :which-key "copy branch"))
+  (ik/leader
+    "g b" '(magit-blame-addition :which-key "blame")
+    "g c" '(magit-clone-regular :which-key "clone repo")
+    "g s" '(magit-status :which-key "status")
+    "g l" '(git-link :which-key "copy link")
+    "g L" '(git-link-commit :which-key "copy commit link")
+    "o g" '(:ignore t :which-key "git")
+    "o g b" '(ik/magit-copy-current-branch :which-key "copy branch"))
 #+end_src
 
 * Snippets
