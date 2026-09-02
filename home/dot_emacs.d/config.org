@@ -1486,6 +1486,54 @@ before searching."
             :which-key "rg project default"))
 #+end_src
 
+* Keybinding usage tracking
+
+#+begin_src emacs-lisp
+(defvar ik/keybinding-usage-log-file
+  (expand-file-name "var/keybinding-usage.tsv" user-emacs-directory)
+  "File where keybinding usage events are appended.")
+
+(defvar ik/keybinding-usage-excluded-commands
+  '(self-insert-command
+    org-self-insert-command
+    backward-delete-char-untabify
+    delete-backward-char
+    mwheel-scroll
+    mouse-set-point
+    ignore)
+  "Commands that should not be recorded in keybinding usage logs.")
+
+(defun ik/keybinding-usage-log-command ()
+  "Append the current command invocation to `ik/keybinding-usage-log-file'."
+  (let* ((command this-command)
+         (keys (key-description (this-command-keys-vector))))
+    (when (and (commandp command)
+               (not (member command ik/keybinding-usage-excluded-commands))
+               (not (string= keys "")))
+      (let* ((project (and (fboundp 'project-current)
+                           (ignore-errors (project-current nil))))
+             (project-root (if project (project-root project) ""))
+             (line (format "%s\t%s\t%s\t%s\t%s\n"
+                           (format-time-string "%FT%T%z")
+                           keys
+                           command
+                           major-mode
+                           project-root)))
+        (make-directory (file-name-directory ik/keybinding-usage-log-file) t)
+        (with-temp-buffer
+          (insert line)
+          (write-region (point-min) (point-max) ik/keybinding-usage-log-file t 'silent))))))
+
+(define-minor-mode ik/keybinding-usage-mode
+  "Record invoked keybindings to `ik/keybinding-usage-log-file'."
+  :global t
+  (if ik/keybinding-usage-mode
+      (add-hook 'post-command-hook #'ik/keybinding-usage-log-command)
+    (remove-hook 'post-command-hook #'ik/keybinding-usage-log-command)))
+
+(ik/keybinding-usage-mode 1)
+#+end_src
+
 * Projects
 
 #+begin_src emacs-lisp
