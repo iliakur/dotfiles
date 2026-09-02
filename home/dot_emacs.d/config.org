@@ -1488,6 +1488,8 @@ before searching."
 
 * Keybinding usage tracking
 
+Disabled for now, it slows emacs down to a halt.
+
 #+begin_src emacs-lisp
 (defvar ik/keybinding-usage-log-file
   (expand-file-name "var/keybinding-usage.tsv" user-emacs-directory)
@@ -1531,7 +1533,7 @@ before searching."
       (add-hook 'post-command-hook #'ik/keybinding-usage-log-command)
     (remove-hook 'post-command-hook #'ik/keybinding-usage-log-command)))
 
-(ik/keybinding-usage-mode 1)
+(ik/keybinding-usage-mode 0)
 #+end_src
 
 * Projects
