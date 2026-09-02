@@ -1490,7 +1490,14 @@ before searching."
 
 #+begin_src emacs-lisp
 (use-package project
-  :straight nil)
+  :straight nil
+  :config
+  (setq project-switch-commands
+        '((project-find-file "f" "Find file")
+          (project-switch-to-buffer "b" "Switch to buffer")
+          (project-dired "d" "Dired")
+          (consult-ripgrep "s" "Ripgrep")
+          (magit-project-status "g" "Magit"))))
 
 (ik/leader
   "p p" '(project-switch-project :which-key "switch project")
