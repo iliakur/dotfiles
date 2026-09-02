@@ -111,6 +111,7 @@ Notes about lock tracking:
     "f" '(:ignore t :which-key "files")
     "g" '(:ignore t :which-key "git")
     "j" '(:ignore t :which-key "jump")
+    "n" '(:ignore t :which-key "narrow")
     "p" '(:ignore t :which-key "project")
     "q" '(:ignore t :which-key "quit")
     "s" '(:ignore t :which-key "search")
@@ -574,6 +575,42 @@ With DELETE-WINDOW, also delete that buffer's window."
   "F O" '(dired-other-frame :which-key "dired other frame")
   "q f" '(save-buffers-kill-terminal :which-key "quit this client/frame")
   "q q" '(save-buffers-kill-emacs :which-key "quit emacs process"))
+
+(put 'narrow-to-region 'disabled nil)
+
+(defun ik/narrow-to-indirect-buffer (narrower target-kind target-name)
+  "Use NARROWER to narrow within an indirect buffer.
+TARGET-KIND names the entity kind, TARGET-NAME is a function returning an
+optional entity name for the new buffer."
+  (let* ((name (and target-name (ignore-errors (funcall target-name))))
+         (buffer-name (and name (concat (buffer-name) "::" name))))
+    (clone-indirect-buffer buffer-name 'display))
+  (call-interactively narrower)
+  (message "%s narrowed to an indirect buffer" target-kind))
+
+(defun ik/narrow-to-defun-indirect-buffer ()
+  "Narrow to the current function in an indirect buffer."
+  (interactive)
+  (ik/narrow-to-indirect-buffer 'narrow-to-defun "Function" #'which-function))
+
+(defun ik/narrow-to-page-indirect-buffer ()
+  "Narrow to the current page in an indirect buffer."
+  (interactive)
+  (ik/narrow-to-indirect-buffer 'narrow-to-page "Page" nil))
+
+(defun ik/narrow-to-region-indirect-buffer ()
+  "Narrow to the active region in an indirect buffer."
+  (interactive)
+  (ik/narrow-to-indirect-buffer 'narrow-to-region "Region" nil))
+
+(ik/leader
+  "n f" '(narrow-to-defun :which-key "narrow to function")
+  "n F" '(ik/narrow-to-defun-indirect-buffer :which-key "narrow function indirect")
+  "n p" '(narrow-to-page :which-key "narrow to page")
+  "n P" '(ik/narrow-to-page-indirect-buffer :which-key "narrow page indirect")
+  "n r" '(narrow-to-region :which-key "narrow to region")
+  "n R" '(ik/narrow-to-region-indirect-buffer :which-key "narrow region indirect")
+  "n w" '(widen :which-key "widen"))
 #+end_src
 
 * Jumping and windows
