@@ -152,8 +152,8 @@ Notes about lock tracking:
 
 (defun ik/copy-current-file-path (&optional style)
   "Copy information about the current file to the kill ring.
-STYLE may be `path', `line', `line-column', `directory', `name', or
-`name-sans-extension'."
+STYLE may be `path', `line', `line-column', `directory', `name',
+`name-sans-extension', or `project-relative'."
   (interactive)
   (let* ((filename (or (buffer-file-name)
                        (user-error "Current buffer is not visiting a file")))
@@ -166,6 +166,11 @@ STYLE may be `path', `line', `line-column', `directory', `name', or
                  ('name (file-name-nondirectory filename))
                  ('name-sans-extension
                   (file-name-sans-extension (file-name-nondirectory filename)))
+                 ('project-relative
+                  (let* ((project (or (project-current)
+                                      (user-error "Current buffer is not in a project")))
+                         (root (project-root project)))
+                    (file-relative-name filename root)))
                  (_ filename))))
     (kill-new text)
     (message "%s" text)))
@@ -176,6 +181,17 @@ STYLE may be `path', `line', `line-column', `directory', `name', or
   (let ((directory (expand-file-name default-directory)))
     (kill-new directory)
     (message "%s" directory)))
+
+(defun ik/copy-current-directory-project-relative-path ()
+  "Copy the current directory path relative to the current project root."
+  (interactive)
+  (let* ((project (or (project-current)
+                      (user-error "Current buffer is not in a project")))
+         (root (project-root project))
+         (directory (expand-file-name default-directory))
+         (text (file-relative-name directory root)))
+    (kill-new text)
+    (message "%s" text)))
 
 (defun ik/copy-current-file-path-with-line ()
   "Copy the current file path with line number to the kill ring."
@@ -196,6 +212,11 @@ STYLE may be `path', `line', `line-column', `directory', `name', or
   "Copy the current file name without extension to the kill ring."
   (interactive)
   (ik/copy-current-file-path 'name-sans-extension))
+
+(defun ik/copy-current-file-project-relative-path ()
+  "Copy the current file path relative to the current project root."
+  (interactive)
+  (ik/copy-current-file-path 'project-relative))
 
 (defvar ik/killed-file-buffers nil
   "Recently killed file buffers, newest first.")
@@ -1475,7 +1496,10 @@ before searching."
   "p p" '(project-switch-project :which-key "switch project")
   "p f" '(project-find-file :which-key "project file")
   "p b" '(project-switch-to-buffer :which-key "project buffer")
-  "p s" '(consult-ripgrep :which-key "project search"))
+  "p s" '(consult-ripgrep :which-key "project search")
+  "p y" '(:ignore t :which-key "copy path")
+  "p y f" '(ik/copy-current-file-project-relative-path :which-key "file path")
+  "p y d" '(ik/copy-current-directory-project-relative-path :which-key "directory path"))
 #+end_src
 
 * Git
