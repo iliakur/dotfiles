@@ -6,8 +6,8 @@ Guidance for coding agents working in `home/dot_emacs.d`.
 
 - `config.org` is authoritative.
 - `config.el` is generated from `config.org`.
-- If both are edited, keep them in sync immediately.
 - Prefer editing `config.org` first, then regenerate `config.el`.
+- If both are edited, keep them in sync immediately.
 
 ## Regenerating config
 
@@ -56,6 +56,18 @@ emacsclient -n -e '(+ 1 2)'
 ```
 
 3. If socket exists but client gets `Connection refused`, restart daemon and reconnect clients.
+
+## Updating the package lock file
+
+The file `straight/versions/default.el` pins package versions. Straight.el does not update it automatically when new packages are added.
+
+After adding or removing packages in `config.org`:
+
+```bash
+emacs --batch -l ~/.emacs.d/init.el --eval '(straight-freeze-versions t)'
+```
+
+Then commit the updated `straight/versions/default.el`.
 
 ## Operational rules for agents
 
