@@ -974,29 +974,50 @@ With DELETE-WINDOW, also delete that buffer's window."
     ("T" "toggle" ik/toggle-frame-transparency)]])
 
 
-(defun ik/toggle-unavailable (feature)
-  "Report that Spacemacs FEATURE has no configured vanilla equivalent."
-  (interactive "sFeature: ")
-  (message "%s toggle is not configured in this vanilla Emacs setup" feature))
+(use-package centered-cursor-mode
+  :commands (centered-cursor-mode global-centered-cursor-mode)
+  :config
+  (setq ccm-recenter-at-end-of-file t))
+
+(use-package golden-ratio
+  :commands golden-ratio-mode
+  :config
+  (dolist (m '("bs-mode" "calc-mode" "ediff-mode" "dired-mode"
+               "gud-mode" "gdb-locals-mode" "gdb-registers-mode"
+               "gdb-breakpoints-mode" "gdb-threads-mode"
+               "gdb-frames-mode" "gdb-inferior-io-mode"))
+    (add-to-list 'golden-ratio-exclude-modes m)))
+
+(use-package highlight-indentation
+  :commands (highlight-indentation-mode
+             highlight-indentation-current-column-mode))
+
+(use-package indent-guide
+  :commands (indent-guide-mode indent-guide-global-mode)
+  :config
+  (setq indent-guide-delay 0.3))
+
+(use-package aggressive-indent
+  :commands (aggressive-indent-mode global-aggressive-indent-mode))
 
 (ik/leader
-  "t -" '((lambda () (interactive) (ik/toggle-unavailable "centered cursor")) :which-key "centered cursor")
-  "t C--" '((lambda () (interactive) (ik/toggle-unavailable "global centered cursor")) :which-key "global centered cursor")
+  "t -" '(centered-cursor-mode :which-key "centered cursor")
+  "t C--" '(global-centered-cursor-mode :which-key "global centered cursor")
   "t 8" '(ik/toggle-long-line-highlight :which-key "long line highlight")
   "t C-8" '(ik/global-toggle-long-line-highlight :which-key "global long line highlight")
   "t a" '(corfu-mode :which-key "completion")
   "t c" '(subword-mode :which-key "subword mode")
   "t F" '(auto-fill-mode :which-key "auto-fill")
   "t f" '(display-fill-column-indicator-mode :which-key "fill column")
-  "t g" '((lambda () (interactive) (ik/toggle-unavailable "golden-ratio")) :which-key "golden-ratio")
+  "t g" '(golden-ratio-mode :which-key "golden-ratio")
   "t h" '(:ignore t :which-key "highlight")
   "t h h" '(hl-line-mode :which-key "current line")
-  "t h i" '((lambda () (interactive) (ik/toggle-unavailable "indentation levels")) :which-key "indentation levels")
-  "t h c" '((lambda () (interactive) (ik/toggle-unavailable "indentation column")) :which-key "indentation column")
+  "t h i" '(highlight-indentation-mode :which-key "indentation levels")
+  "t h c" '(highlight-indentation-current-column-mode :which-key "indentation column")
   "t h s" '(ik/toggle-syntax-highlighting :which-key "syntax highlighting")
-  "t i" '((lambda () (interactive) (ik/toggle-unavailable "indentation guide")) :which-key "indentation guide")
-  "t C-i" '((lambda () (interactive) (ik/toggle-unavailable "global indentation guide")) :which-key "global indentation guide")
-  "t I" '((lambda () (interactive) (ik/toggle-unavailable "aggressive indent")) :which-key "aggressive indent")
+  "t i" '(indent-guide-mode :which-key "indentation guide")
+  "t C-i" '(indent-guide-global-mode :which-key "global indentation guide")
+  "t I" '(aggressive-indent-mode :which-key "aggressive indent")
   "t K" '(which-key-mode :which-key "which-key")
   "t l" '(toggle-truncate-lines :which-key "truncate lines")
   "t L" '(visual-line-mode :which-key "visual lines")
