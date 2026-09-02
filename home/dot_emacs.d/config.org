@@ -517,7 +517,7 @@ With DELETE-WINDOW, also delete that buffer's window."
   "f l" '(find-file-literally :which-key "find literally")
   "f L" '(locate :which-key "locate")
   "f o" '(ik/open-current-file-externally :which-key "open externally")
-  "f r" '(recentf-open-files :which-key "recent files")
+  "f r" '(consult-recent-file :which-key "recent files")
   "f s" '(save-buffer :which-key "save file")
   "f S" '(save-some-buffers :which-key "save all files")
   "f R" '(ik/rename-current-buffer-file :which-key "rename file")
