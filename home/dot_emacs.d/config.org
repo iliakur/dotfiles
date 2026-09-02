@@ -15,8 +15,14 @@
   (use-package evil
     :init
     (setq evil-want-keybinding nil)
+    (setq evil-default-state 'normal)
+    (setq evil-emacs-state-modes nil)
     :config
     (evil-mode 1)
+    (add-hook 'after-change-major-mode-hook
+              (lambda ()
+                (unless (minibufferp)
+                  (evil-normal-state))))
 
     ;; Start with the HNEI/Colemak movement that was used most often. Add more
     ;; layout-specific mappings later only when concrete missing behavior appears.
