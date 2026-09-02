@@ -1804,7 +1804,18 @@ Disabled for now, it slows emacs down to a halt.
   :straight t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode)))
+         ("\\.markdown\\'" . markdown-mode))
+  :config
+  (evil-define-key 'normal markdown-mode-map
+    "gh" #'outline-up-heading
+    "gn" #'outline-forward-same-level
+    "ge" #'outline-backward-same-level
+    "gi" #'outline-next-visible-heading)
+  (evil-define-key 'normal gfm-mode-map
+    "gh" #'outline-up-heading
+    "gn" #'outline-forward-same-level
+    "ge" #'outline-backward-same-level
+    "gi" #'outline-next-visible-heading))
 
 (use-package markdown-ts-mode
   :straight t
@@ -1819,10 +1830,34 @@ Disabled for now, it slows emacs down to a halt.
   :config
   (setq org-special-ctrl-a/e t)
   (setq org-log-into-drawer t)
+  (setq org-imenu-depth 8)
   (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
+
+  (evil-define-key 'normal org-mode-map
+    "gh" #'outline-up-heading
+    "gn" #'outline-forward-same-level
+    "ge" #'outline-backward-same-level
+    "gi" #'outline-next-visible-heading)
+
+  (ik/local-leader
+    :keymaps 'org-mode-map
+    "s" '(:ignore t :which-key "subtree")
+    "s b" '(org-tree-to-indirect-buffer :which-key "indirect buffer")
+    "s d" '(org-cut-subtree :which-key "cut")
+    "s h" '(org-promote-subtree :which-key "promote")
+    "s i" '(org-demote-subtree :which-key "demote")
+    "s e" '(org-move-subtree-up :which-key "move up")
+    "s n" '(org-move-subtree-down :which-key "move down")
+    "s N" '(org-narrow-to-subtree :which-key "narrow to subtree")
+    "s p" '(org-paste-subtree :which-key "paste")
+    "s r" '(org-refile :which-key "refile")
+    "s s" '(org-sparse-tree :which-key "sparse tree")
+    "s S" '(org-sort :which-key "sort")
+    "s w" '(widen :which-key "widen")
+    "s y" '(org-copy-subtree :which-key "copy")))
 #+end_src
 
 * Utilities
