@@ -1690,6 +1690,22 @@ Disabled for now, it slows emacs down to a halt.
   :config
   (setq treesit-auto-install (unless noninteractive 'prompt))
   (global-treesit-auto-mode 1))
+
+(use-package yaml-ts-mode
+  :straight nil
+  :mode ("\\.ya?ml\\'"))
+
+(use-package combobulate
+  :straight (:host github :repo "mickeynp/combobulate")
+  :hook ((python-ts-mode . combobulate-mode)
+         (js-ts-mode . combobulate-mode)
+         (typescript-ts-mode . combobulate-mode)
+         (tsx-ts-mode . combobulate-mode)
+         (json-ts-mode . combobulate-mode)
+         (css-ts-mode . combobulate-mode)
+         (html-ts-mode . combobulate-mode)
+         (go-ts-mode . combobulate-mode)
+         (yaml-ts-mode . combobulate-mode)))
 #+end_src
 
 * Programming
