@@ -578,6 +578,7 @@ With DELETE-WINDOW, also delete that buffer's window."
   "q q" '(save-buffers-kill-emacs :which-key "quit emacs process"))
 
 (put 'narrow-to-region 'disabled nil)
+(put 'erase-buffer 'disabled nil)
 
 (defun ik/narrow-to-indirect-buffer (narrower target-kind target-name)
   "Use NARROWER to narrow within an indirect buffer.
