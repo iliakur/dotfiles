@@ -129,6 +129,20 @@ Notes about lock tracking:
   (setq recentf-max-menu-items 25)
   (recentf-mode 1))
 
+;; Persist minibuffer history so Vertico's default sort function
+;; (`vertico-sort-history-length-alpha') can rank candidates by recency and
+;; decayed duplicate frequency across sessions.  Duplicates must be kept for
+;; the frequency part of that ranking to work.
+(use-package savehist
+  :straight nil
+  :config
+  (make-directory (expand-file-name "var" user-emacs-directory) t)
+  (setq savehist-file (expand-file-name "var/history" user-emacs-directory))
+  (setq history-length 1000)
+  (setq history-delete-duplicates nil)
+  (setq savehist-additional-variables '(search-ring regexp-search-ring kill-ring))
+  (savehist-mode 1))
+
 (defun ik/switch-to-scratch-buffer ()
   "Switch to the *scratch* buffer, creating it when necessary."
   (interactive)
