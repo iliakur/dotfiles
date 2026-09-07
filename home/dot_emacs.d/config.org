@@ -106,6 +106,7 @@ Notes about lock tracking:
     "TAB" '(previous-buffer :which-key "previous buffer")
     "U" '(universal-argument :which-key "universal argument")
     "u" '(universal-argument :which-key "universal argument")
+    "v" '(er/expand-region :which-key "expand region")
     "b" '(:ignore t :which-key "buffers")
     "F" '(:ignore t :which-key "frames")
     "f" '(:ignore t :which-key "files")
@@ -1036,6 +1037,9 @@ optional entity name for the new buffer."
 
 (use-package aggressive-indent
   :commands (aggressive-indent-mode global-aggressive-indent-mode))
+
+(use-package expand-region
+  :commands (er/expand-region))
 
 (ik/leader
   "t -" '(centered-cursor-mode :which-key "centered cursor")
