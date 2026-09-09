@@ -84,12 +84,6 @@ Required format:
 - rooted tree
 - each node explicitly linked to parent by “supports” relationship
 
-After writing `purpose.md`, open it in `$EDITOR`:
-
-```bash
-"${EDITOR:-vi}" "$out/purpose.md"
-```
-
 ### 3) Define inputs, outputs, and side effects (data flow)
 
 After the purpose tree is complete, map how data flows through the changed behavior.
