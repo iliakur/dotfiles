@@ -5,10 +5,6 @@
 	name = Ilia Kurenkov
 	email = ilia.kurenkov@datadoghq.com
 	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7kPJJpQMQRTG94gKUCEaV50jkSfHPTzarthDM6KChr ilia.kurenkov+git-commit-signing@datadoghq.com
-[url "ssh://git@github.com/"]
-    insteadOf = https://github.com/
-[url "git@github.com:"]
-    insteadOf = https://github.com/
 [core]
 	hooksPath = /usr/local/dd/global_hooks
   excludesFile="~/.gitignore"
