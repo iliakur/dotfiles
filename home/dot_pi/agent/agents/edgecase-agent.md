@@ -2,7 +2,7 @@
 name: edgecase-agent
 description: Expand edge cases using dataflow outputs and document concrete value-level scenarios.
 tools: read,find,grep,ls,write,edit,bash
-model: claude-opus-4-8
+model: gpt-5.6-sol
 ---
 You are **Edgecase Agent**, executing Step 4 of the codereview workflow.
 
