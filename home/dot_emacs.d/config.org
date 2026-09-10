@@ -441,9 +441,14 @@ With DELETE-WINDOW, also delete that buffer's window."
                          "emacs-lisp"))
 
 (defun ik/reload-init-file ()
-  "Reload this Emacs configuration."
+  "Reload init.el, re-tangling config.org when it is newer than config.el."
   (interactive)
-  (load-file (expand-file-name "init.el" user-emacs-directory)))
+  (let ((org (expand-file-name "config.org" user-emacs-directory))
+        (el (expand-file-name "config.el" user-emacs-directory)))
+    (when (file-newer-than-file-p org el)
+      (require 'org)
+      (org-babel-tangle-file org el "emacs-lisp"))
+    (load-file (expand-file-name "init.el" user-emacs-directory))))
 
 (defun ik/update-straight-packages ()
   "Update straight.el packages."
@@ -565,7 +570,7 @@ With DELETE-WINDOW, also delete that buffer's window."
   "f e i" '(ik/open-init-el :which-key "init.el")
   "f e I" '(ik/open-early-init-el :which-key "early-init.el")
   "f e l" '(locate-library :which-key "locate library")
-  "f e R" '(ik/tangle-config-org :which-key "tangle config")
+  "f e r" '(ik/reload-init-file :which-key "reload config")
   "f e U" '(ik/update-straight-packages :which-key "update packages")
   "f e v" '(ik/copy-emacs-version :which-key "emacs version")
   "f e c" '(ik/recompile-straight-builds :which-key "recompile packages")
