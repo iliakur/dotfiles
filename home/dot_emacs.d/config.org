@@ -7,6 +7,10 @@
 
 (setq inhibit-startup-screen t)
 (defalias 'yes-or-no-p #'y-or-n-p)
+
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
 #+end_src
 
 * Package management (straight.el)
@@ -152,6 +156,8 @@ Notes about lock tracking:
   "Revert the current buffer without asking for confirmation."
   (interactive)
   (revert-buffer :ignore-auto :noconfirm))
+
+(global-set-key (kbd "C-c r") #'ik/revert-buffer-no-confirm)
 
 (defun ik/rename-current-buffer-file (new-name)
   "Rename the file visited by the current buffer to NEW-NAME."
