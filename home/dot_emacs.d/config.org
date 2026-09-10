@@ -1721,6 +1721,12 @@ Disabled for now, it slows emacs down to a halt.
   :straight nil
   :mode ("\\.ya?ml\\'"))
 
+(use-package toml-ts-mode
+  :straight nil
+  :mode ("\\.toml\\'"))
+
+(add-to-list 'auto-mode-alist '("\\.ini\\'" . conf-unix-mode))
+
 (use-package combobulate
   :straight (:host github :repo "mickeynp/combobulate")
   :hook ((python-ts-mode . combobulate-mode)
