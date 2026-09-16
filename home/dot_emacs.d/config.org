@@ -1658,12 +1658,22 @@ Disabled for now, it slows emacs down to a halt.
 (use-package project
   :straight nil
   :config
-  (setq project-switch-commands
-        '((project-find-file "f" "Find file")
-          (project-switch-to-buffer "b" "Switch to buffer")
-          (project-dired "d" "Dired")
-          (consult-ripgrep "s" "Ripgrep")
-          (magit-project-status "g" "Magit"))))
+  (defun ik/project-switch-action ()
+    "Switch to a buffer in the current project, or find a file if none."
+    (interactive)
+    (let* ((pr (project-current t))
+           (buffers (cl-remove-if
+                     (lambda (b)
+                       (or (string-prefix-p " " (buffer-name b))
+                           (string-prefix-p "*" (buffer-name b))
+                           (and project-ignore-buffer-conditions
+                                (project--buffer-check
+                                 b project-ignore-buffer-conditions))))
+                     (project-buffers pr))))
+      (if buffers
+          (call-interactively #'project-switch-to-buffer)
+        (call-interactively #'project-find-file))))
+  (setq project-switch-commands 'ik/project-switch-action))
 
 (ik/leader
   "p p" '(project-switch-project :which-key "switch project")
