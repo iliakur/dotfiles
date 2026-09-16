@@ -1,5 +1,15 @@
 {
   "mcpServers": {
+    "atlassian": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp"
+    },
+    "my-local-server": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["some-mcp-server", "--transport", "stdio"],
+      "env": {}
+    },
     "trajectory": {
       "args": [
         "mcp"
