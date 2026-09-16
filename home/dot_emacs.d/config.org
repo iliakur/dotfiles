@@ -107,7 +107,9 @@ Notes about lock tracking:
     :global-prefix "C-,")
 
   (ik/leader
-    "TAB" '(previous-buffer :which-key "previous buffer")
+    "TAB" '(ik/alternate-buffer :which-key "last buffer")
+    "S-TAB" '(ik/cycle-buffer-backward :which-key "cycle back")
+    "C-TAB" '(ik/cycle-buffer-forward :which-key "cycle fwd")
     "U" '(universal-argument :which-key "universal argument")
     "u" '(universal-argument :which-key "universal argument")
     "v" '(er/expand-region :which-key "expand region")
@@ -259,6 +261,32 @@ STYLE may be `path', `line', `line-column', `directory', `name',
   (if-let* ((filename (pop ik/killed-file-buffers)))
       (find-file filename)
     (user-error "No killed file buffer to reopen")))
+
+(defun ik/alternate-buffer-skip (_window buffer _bury-or-kill)
+  "For use as `switch-to-prev-buffer-skip' in `ik/alternate-buffer'.
+Skips ephemeral non-file buffers whose names begin with `*'."
+  (and (string-prefix-p "*" (buffer-name buffer))
+       (not (buffer-file-name buffer))))
+
+(defun ik/alternate-buffer ()
+  "Toggle between current and last buffer in the selected window."
+  (interactive)
+  (let ((switch-to-prev-buffer-skip #'ik/alternate-buffer-skip))
+    (set-window-next-buffers nil nil)
+    (previous-buffer)
+    (set-window-next-buffers nil nil)))
+
+(defun ik/cycle-buffer-backward ()
+  "Cycle to the previous buffer in the selected window's ring."
+  (interactive)
+  (let ((switch-to-prev-buffer-skip #'ik/alternate-buffer-skip))
+    (previous-buffer)))
+
+(defun ik/cycle-buffer-forward ()
+  "Cycle to the next buffer in the selected window's ring."
+  (interactive)
+  (let ((switch-to-prev-buffer-skip #'ik/alternate-buffer-skip))
+    (next-buffer)))
 
 (defun ik/kill-current-buffer-and-window ()
   "Kill the current buffer and delete its window."
