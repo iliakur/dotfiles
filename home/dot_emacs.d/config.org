@@ -1896,16 +1896,28 @@ Disabled for now, it slows emacs down to a halt.
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :config
-  (evil-define-key 'normal markdown-mode-map
-    "gh" #'outline-up-heading
-    "gn" #'outline-forward-same-level
-    "ge" #'outline-backward-same-level
-    "gi" #'outline-next-visible-heading)
-  (evil-define-key 'normal gfm-mode-map
-    "gh" #'outline-up-heading
-    "gn" #'outline-forward-same-level
-    "ge" #'outline-backward-same-level
-    "gi" #'outline-next-visible-heading))
+  (general-define-key
+   :states '(normal visual motion)
+   :keymaps '(markdown-mode-map gfm-mode-map)
+   :prefix "g"
+   "h" '(markdown-outline-up :which-key "up heading")
+   "n" '(markdown-outline-next-same-level :which-key "next sibling")
+   "e" '(markdown-outline-previous-same-level :which-key "prev sibling")
+   "i" '(markdown-outline-next :which-key "next heading"))
+  (general-define-key
+   :states '(normal insert visual motion)
+   :keymaps '(markdown-mode-map gfm-mode-map)
+   "C-<return>" #'markdown-insert-header-dwim)
+  (ik/local-leader
+    :keymaps '(markdown-mode-map gfm-mode-map)
+    "s" '(:ignore t :which-key "subtree")
+    "s d" '(markdown-kill-outline :which-key "cut")
+    "s h" '(markdown-promote-subtree :which-key "promote")
+    "s i" '(markdown-demote-subtree :which-key "demote")
+    "s e" '(markdown-move-subtree-up :which-key "move up")
+    "s n" '(markdown-move-subtree-down :which-key "move down")
+    "s N" '(markdown-narrow-to-subtree :which-key "narrow to subtree")
+    "s w" '(widen :which-key "widen")))
 
 (use-package markdown-ts-mode
   :straight t
