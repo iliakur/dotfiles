@@ -1709,14 +1709,14 @@ Disabled for now, it slows emacs down to a halt.
                                               (substring abs len)
                                             f)
                                           abs))))
-                           (project-files pr))))))))
+                           (project-files pr)))))))
     "Project files not already offered as buffers or recent files.")
 
   (defun ik/project-switch-action ()
     "Pick a buffer or file in the current project."
     (interactive)
     (let* ((pr (project-current t))
-           (consult-project-function (lambda (_ _) (project-root pr))))
+           (consult-project-function (lambda (_) (project-root pr))))
       (consult-buffer
        '(ik/consult-source-project-buffer
          consult-source-project-recent-file
