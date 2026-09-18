@@ -6,6 +6,7 @@
 ;;; config.el --- Generated from config.org -*- lexical-binding: t; -*-
 
 (setq inhibit-startup-screen t)
+(setq initial-major-mode 'org-mode)
 (defalias 'yes-or-no-p #'y-or-n-p)
 
 (global-auto-revert-mode 1)
