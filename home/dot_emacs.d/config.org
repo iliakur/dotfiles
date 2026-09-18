@@ -1677,41 +1677,6 @@ Disabled for now, it slows emacs down to a halt.
              :as #'consult--buffer-pair))))
     "Project buffer source excluding special `*' buffers.")
 
-  (defvar ik/consult-source-project-file
-    `( :name     "Project File"
-       :narrow   ?f
-       :category file
-       :face     consult-file
-       :history  file-name-history
-       :state    ,#'consult--file-state
-       :new
-       ,(lambda (file)
-          (consult--file-action
-           (expand-file-name file (consult--project-root))))
-       :enabled  ,(lambda () consult-project-function)
-       :items
-       ,(lambda ()
-          (when-let* ((root (consult--project-root))
-                      (pr (project-current nil root)))
-            (let ((len (length root))
-                  (skip (consult--string-hash
-                         (append
-                          (delq nil
-                                (mapcar (lambda (f)
-                                          (and (string-prefix-p root f) f))
-                                        (bound-and-true-p recentf-list)))
-                          (hash-table-keys (consult--buffer-file-hash))))))
-              (delq nil
-                   (mapcar (lambda (f)
-                             (let ((abs (expand-file-name f root)))
-                               (and (not (gethash abs skip))
-                                    (cons (if (string-prefix-p root abs)
-                                              (substring abs len)
-                                            f)
-                                          abs))))
-                           (project-files pr)))))))
-    "Project files not already offered as buffers or recent files.")
-
   (defun ik/project-switch-action ()
     "Pick a buffer or file in the current project."
     (interactive)
@@ -1719,8 +1684,7 @@ Disabled for now, it slows emacs down to a halt.
            (consult-project-function (lambda (_) (project-root pr))))
       (consult-buffer
        '(ik/consult-source-project-buffer
-         consult-source-project-recent-file
-         ik/consult-source-project-file))))
+         consult-source-project-recent-file))))
   (setq project-switch-commands 'ik/project-switch-action))
 
 (ik/leader
