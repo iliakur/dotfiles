@@ -126,6 +126,7 @@ Notes about lock tracking:
     "t" '(:ignore t :which-key "toggles")
     "T" '(:ignore t :which-key "UI toggles")
     "w" '(:ignore t :which-key "windows")
+    "x" '(:ignore t :which-key "text")
     "o" '(:ignore t :which-key "user")))
 
 (use-package recentf
@@ -680,6 +681,7 @@ optional entity name for the new buffer."
 (use-package ace-window)
 (use-package avy)
 (use-package goto-chg)
+(use-package link-hint)
 
 (defun ik/jump-beginning-of-line ()
   "Go to the beginning of the line, pushing the previous location to the mark ring."
@@ -886,6 +888,12 @@ optional entity name for the new buffer."
   "j U" '(ik/browse-url-at-point :which-key "browse url")
   "j v" '(find-variable :which-key "variable definition")
   "j w" '(avy-goto-word-1 :which-key "avy word")
+  "x A" '(link-hint-open-all-links :which-key "open all links")
+  "x m" '(link-hint-open-multiple-links :which-key "open multiple links")
+  "x o" '(link-hint-open-link-at-point :which-key "open link at point")
+  "x O" '(link-hint-open-link :which-key "open link")
+  "x y" '(link-hint-copy-link-at-point :which-key "copy link at point")
+  "x Y" '(link-hint-copy-link :which-key "copy link")
   "w TAB" '(other-window :which-key "alternate window")
   "w =" '(balance-windows :which-key "balance windows")
   "w _" '(ik/maximize-window-horizontally :which-key "maximize horizontally")

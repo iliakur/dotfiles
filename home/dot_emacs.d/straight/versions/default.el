@@ -34,6 +34,7 @@
  ("ht.el" . "1c49aad1c820c86f7ee35bf9fff8429502f60fef")
  ("iedit" . "14161daa295332a49dda92b97c00d62efd38acfe")
  ("indent-guide" . "1332f95d6f08afee35f62621793e2622b9f86f27")
+ ("link-hint.el" . "8fda5dcb9caff5a3c49d22b82e570ac9e29af7dd")
  ("llama" . "4d4024048053b898a01521046e0f063ee47615b0")
  ("magit" . "137f137dccb37097ae9caa31018cafa071ff4ec1")
  ("marginalia" . "7ec0b70afb43a756ecd45a958c6ebe797717fc91")
