@@ -1686,19 +1686,39 @@ Disabled for now, it slows emacs down to a halt.
     "Project buffer source excluding special `*' buffers.")
 
   (defun ik/project-switch-action ()
-    "Pick a buffer or file in the current project."
+    "Pick a buffer or file in the current project.
+Fall back to `project-find-file' when the project has neither open buffers
+nor recent files."
     (interactive)
     (let* ((pr (project-current t))
-           (consult-project-function (lambda (_) (project-root pr))))
-      (consult-buffer
-       '(ik/consult-source-project-buffer
-         consult-source-project-recent-file))))
+           (root (project-root pr))
+           (consult-project-function (lambda (_) root)))
+      (if (or (consult--buffer-query
+               :directory root
+               :exclude (append consult-buffer-filter '("\\`\\*")))
+              (cl-some (lambda (file) (file-in-directory-p file root))
+                       recentf-list))
+          (consult-buffer
+           '(ik/consult-source-project-buffer
+             consult-source-project-recent-file))
+        (project-find-file))))
+
+  (defun ik/kill-project-buffers ()
+    "Kill all buffers belonging to the current project."
+    (interactive)
+    (let* ((pr (or (project-current)
+                   (user-error "Current buffer is not in a project")))
+           (buffers (project-buffers pr)))
+      (mapc #'kill-buffer buffers)
+      (message "Killed %d buffer%s"
+               (length buffers) (if (= (length buffers) 1) "" "s"))))
   (setq project-switch-commands 'ik/project-switch-action))
 
 (ik/leader
   "p p" '(project-switch-project :which-key "switch project")
   "p f" '(project-find-file :which-key "project file")
   "p b" '(project-switch-to-buffer :which-key "project buffer")
+  "p k" '(ik/kill-project-buffers :which-key "kill project buffers")
   "p s" '(consult-ripgrep :which-key "project search")
   "p y" '(:ignore t :which-key "copy path")
   "p y f" '(ik/copy-current-file-project-relative-path :which-key "file path")
