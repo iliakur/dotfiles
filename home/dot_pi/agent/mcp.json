@@ -5,16 +5,23 @@
       "url": "https://mcp.atlassian.com/v1/mcp"
     },
     "my-local-server": {
-      "type": "stdio",
+      "args": [
+        "some-mcp-server",
+        "--transport",
+        "stdio"
+      ],
       "command": "uvx",
-      "args": ["some-mcp-server", "--transport", "stdio"],
-      "env": {}
+      "env": {},
+      "type": "stdio"
     },
     "trajectory": {
       "args": [
         "mcp"
       ],
       "command": "/Users/ilia.kurenkov/.pi/agent/extensions/trajectory/bin/trajectory",
+      "env": {
+        "TRAJECTORY_HOME": "/Users/ilia.kurenkov/.trajectory"
+      },
       "lifecycle": "lazy"
     }
   }
