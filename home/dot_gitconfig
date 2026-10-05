@@ -21,6 +21,8 @@
 [rerere]
 	enabled = true
 	autoUpdate = true
+[include]
+	path = /Users/ilia.kurenkov/.config/datadog/git/config
 [includeIf "gitdir:~/src/"]
     path = ~/src/.gitconfig
 [machete "traverse"]
@@ -77,5 +79,3 @@
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-analytics
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-source
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-go
-[include]
-	path = /Users/ilia.kurenkov/.config/datadog/git/config
