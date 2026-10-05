@@ -3,6 +3,7 @@ export type AsyncQueueTask = () => void | Promise<void>;
 interface QueuedTask {
 	task: AsyncQueueTask;
 	lifecycle: boolean;
+	onDrop?: () => void;
 }
 
 export interface AsyncQueueSnapshot {
@@ -34,7 +35,7 @@ export class BoundedSerialQueue {
 		this.capacity = capacity;
 	}
 
-	enqueue(task: AsyncQueueTask): boolean {
+	enqueue(task: AsyncQueueTask, onDrop?: () => void): boolean {
 		// Keep one slot available for SessionEnd so admitting the terminal
 		// event never evicts the newest settled TurnEnd. A capacity-one queue
 		// cannot reserve a second slot, but it must still admit one ordinary task.
@@ -43,7 +44,7 @@ export class BoundedSerialQueue {
 			this.dropped++;
 			return false;
 		}
-		this.tasks.push({ task, lifecycle: false });
+		this.tasks.push({ task, lifecycle: false, onDrop });
 		this.schedule();
 		return true;
 	}
@@ -53,7 +54,7 @@ export class BoundedSerialQueue {
 	 * starve it. At capacity, replace only the newest pending ordinary task;
 	 * lifecycle tasks never evict one another.
 	 */
-	enqueueLifecycle(task: AsyncQueueTask): boolean {
+	enqueueLifecycle(task: AsyncQueueTask, onDrop?: () => void): boolean {
 		if (this.depth() >= this.capacity) {
 			let ordinary = -1;
 			for (let i = this.tasks.length - 1; i >= 0; i--) {
@@ -66,10 +67,10 @@ export class BoundedSerialQueue {
 				this.dropped++;
 				return false;
 			}
-			this.tasks.splice(ordinary, 1);
+			this.dropPending(ordinary);
 			this.dropped++;
 		}
-		this.tasks.push({ task, lifecycle: true });
+		this.tasks.push({ task, lifecycle: true, onDrop });
 		this.schedule();
 		return true;
 	}
@@ -78,7 +79,7 @@ export class BoundedSerialQueue {
 	 * Terminal work has the highest pending priority. If lifecycle work already
 	 * fills the queue, replace the newest pending item so SessionEnd is retained.
 	 */
-	enqueueTerminal(task: AsyncQueueTask): boolean {
+	enqueueTerminal(task: AsyncQueueTask, onDrop?: () => void): boolean {
 		if (this.depth() >= this.capacity) {
 			if (this.tasks.length === 0) {
 				this.dropped++;
@@ -91,11 +92,11 @@ export class BoundedSerialQueue {
 					break;
 				}
 			}
-			if (replacement >= 0) this.tasks.splice(replacement, 1);
-			else this.tasks.pop();
+			if (replacement >= 0) this.dropPending(replacement);
+			else this.dropPending(this.tasks.length - 1);
 			this.dropped++;
 		}
-		this.tasks.push({ task, lifecycle: true });
+		this.tasks.push({ task, lifecycle: true, onDrop });
 		this.schedule();
 		return true;
 	}
@@ -130,19 +131,19 @@ export class BoundedSerialQueue {
 	}
 
 	/**
-	 * At shutdown, discard pending best-effort ordinary work so admitted
-	 * lifecycle events run immediately after the one in-flight helper.
+	 * Remove pending tasks after their owners have copied them into a detached
+	 * handoff. The currently running task is already outside the Pi callback.
 	 */
-	async drainLifecycle(timeoutMs: number, ordinaryGraceMs = 50): Promise<boolean> {
-		const startedAt = Date.now();
-		const graceMs = Math.min(timeoutMs, Math.max(0, ordinaryGraceMs));
-		if (graceMs > 0 && await this.drain(graceMs)) return true;
+	takePendingForHandoff(): number {
+		const count = this.tasks.length;
+		this.tasks.splice(0, count);
+		if (!this.running) this.notifyIdle();
+		return count;
+	}
 
-		const retained = this.tasks.filter((queued) => queued.lifecycle);
-		this.dropped += this.tasks.length - retained.length;
-		this.tasks.splice(0, this.tasks.length, ...retained);
-		const remainingMs = timeoutMs - (Date.now() - startedAt);
-		return await this.drain(remainingMs);
+	private dropPending(index: number): void {
+		const [dropped] = this.tasks.splice(index, 1);
+		dropped?.onDrop?.();
 	}
 
 	private depth(): number {
