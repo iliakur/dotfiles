@@ -22,6 +22,7 @@ const ALLOWED_DIRS: string[] = [
   nodePath.join(nodeOs.homedir(), ".local/share/chezmoi"),
   nodePath.join(nodeOs.homedir(), ".emacs.d"),
   "/Users/ilia.kurenkov/.pi",
+  "/tmp",
 ];
 
 // Heuristic patterns that suggest a bash command writes or deletes files.
