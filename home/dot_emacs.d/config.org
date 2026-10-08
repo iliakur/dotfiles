@@ -1934,6 +1934,21 @@ nor recent files."
             'elm-format))))
 #+end_src
 
+** Go
+
+#+begin_src emacs-lisp
+(use-package go-ts-mode
+  :straight nil
+  :mode "\\.go\\'")
+#+end_src
+
+** Cuelang
+
+#+begin_src emacs-lisp
+(use-package cue-mode
+  :mode "\\.cue\\'")
+#+end_src
+
 * Markdown
 
 #+begin_src emacs-lisp
