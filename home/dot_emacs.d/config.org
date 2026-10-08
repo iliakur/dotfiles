@@ -28,7 +28,6 @@ Notes about lock tracking:
   (use-package evil
     :init
     (setq evil-want-keybinding nil)
-    (setq evil-want-minibuffer t)
     (setq evil-default-state 'normal)
     (setq evil-emacs-state-modes nil)
     :config
@@ -1207,7 +1206,14 @@ optional entity name for the new buffer."
   (setq vertico-count 18
         vertico-resize t
         max-mini-window-height 0.4)
-  (vertico-mode 1))
+  (vertico-mode 1)
+
+  (require 'vertico-directory)
+  (define-key vertico-map (kbd "RET") #'vertico-directory-enter)
+  (define-key vertico-map (kbd "DEL") #'vertico-directory-delete-char)
+  (define-key vertico-map (kbd "M-DEL") #'vertico-directory-delete-word)
+  (define-key vertico-map (kbd "M-h") #'vertico-directory-up)
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy))
 
 (use-package orderless
   :config
