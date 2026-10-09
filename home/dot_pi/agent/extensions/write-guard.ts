@@ -31,10 +31,8 @@ const WRITE_DELETE_PATTERNS = [
   /\brmdir\b/,       // rmdir
   /\bunlink\b/,      // unlink
   /\bmv\s/,          // mv (source file is deleted)
-  /(?<![<>])>(?!>?)/, // > or >> redirects (output redirection)
   /\btee\s/,         // tee (writes to a file)
   /\btruncate\b/,    // truncate
-  /\bdd\s/,          // dd
 ];
 
 let hasBlockedWriteOutsideAllowedDirs = false;
@@ -80,6 +78,15 @@ function looksLikeWriteOrDelete(command: string): boolean {
   return WRITE_DELETE_PATTERNS.some((re) => re.test(command));
 }
 
+function extractPaths(command: string): string[] {
+  return command
+    .split(/\s+/)
+    .map((t) => t.replace(/[;&|]+$/, "").replace(/^["']|["']$/g, ""))
+    .filter(
+      (t) => t.startsWith("/") || t.startsWith("~") || t.startsWith("./") || t.startsWith("../"),
+    );
+}
+
 export default function (pi: ExtensionAPI) {
   pi.on("tool_call", async (event, ctx) => {
     const cwd = ctx.cwd;
@@ -114,8 +121,13 @@ export default function (pi: ExtensionAPI) {
       const command = event.input.command as string;
       if (!looksLikeWriteOrDelete(command)) return undefined;
 
-      // The command looks destructive but we cannot reliably extract paths from
-      // arbitrary shell syntax, so ask the user before allowing it.
+      const targets = extractPaths(command);
+      if (targets.length > 0) {
+        if (targets.every((t) => isAllowed(t, cwd))) return undefined;
+      } else if (isAllowed(cwd, cwd)) {
+        return undefined;
+      }
+
       if (!ctx.hasUI) {
         return { block: true, reason: "Bash write/delete blocked in non-interactive mode." };
       }
