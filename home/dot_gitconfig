@@ -79,3 +79,5 @@
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-analytics
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-source
   repo = /Users/ilia.kurenkov/go/src/github.com/DataDog/dd-go
+[datadog]
+	team = team-agentintegrations
