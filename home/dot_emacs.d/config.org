@@ -1994,6 +1994,7 @@ nor recent files."
 #+begin_src emacs-lisp
 (use-package org
   :straight nil
+  :hook (org-mode . org-indent-mode)
   :config
   (setq org-special-ctrl-a/e t)
   (setq org-log-into-drawer t)
