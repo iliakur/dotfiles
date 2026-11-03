@@ -1981,8 +1981,6 @@ nor recent files."
     "s i" '(markdown-demote-subtree :which-key "demote")
     "s e" '(markdown-move-subtree-up :which-key "move up")
     "s n" '(markdown-move-subtree-down :which-key "move down")
-    "s N" '(markdown-narrow-to-subtree :which-key "narrow to subtree")
-    "s w" '(widen :which-key "widen")))
 
 (use-package markdown-ts-mode
   :straight t
@@ -2027,13 +2025,12 @@ nor recent files."
     "s i" '(org-demote-subtree :which-key "demote")
     "s e" '(org-move-subtree-up :which-key "move up")
     "s n" '(org-move-subtree-down :which-key "move down")
-    "s N" '(org-narrow-to-subtree :which-key "narrow to subtree")
-    "s p" '(org-paste-subtree :which-key "paste")
     "s r" '(org-refile :which-key "refile")
     "s s" '(org-sparse-tree :which-key "sparse tree")
     "s S" '(org-sort :which-key "sort")
-    "s w" '(widen :which-key "widen")
-    "s y" '(org-copy-subtree :which-key "copy")))
+    "s p" '(org-paste-subtree :which-key "paste")
+    "s y" '(org-copy-subtree :which-key "copy")
+    "n" '(org-narrow-to-subtree :which-key "narrow to subtree")))
 #+end_src
 
 * Utilities
