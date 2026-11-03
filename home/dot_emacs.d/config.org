@@ -1998,6 +1998,9 @@ nor recent files."
   :hook (org-mode . org-indent-mode)
   :config
   (setq org-special-ctrl-a/e t)
+  (setq org-todo-keywords
+        '((sequence "TODO" "|" "DONE")
+          (sequence "UNKNOWN" "|")))
   (setq org-log-into-drawer t)
   (setq org-imenu-depth 8)
   (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
@@ -2026,6 +2029,11 @@ nor recent files."
   (defun ik/org-insert-italic ()
     (interactive)
     (org-emphasize ?/))
+
+  (defun ik/toggle-unknown ()
+    (interactive)
+    (org-todo (if (string= (org-get-todo-state) "UNKNOWN")
+                  'none "UNKNOWN")))
 
   (ik/local-leader
     :keymaps 'org-mode-map
