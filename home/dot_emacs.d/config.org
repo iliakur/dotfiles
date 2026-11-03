@@ -2010,6 +2010,14 @@ nor recent files."
     "ge" #'outline-backward-same-level
     "gi" #'outline-next-visible-heading)
 
+  (evil-define-key '(normal insert) org-mode-map
+    (kbd "C-<return>")
+    (lambda (arg)
+      (interactive "P")
+      (org-insert-heading-respect-content arg)
+      (when arg (org-do-demote))
+      (evil-insert-state)))
+
   (ik/local-leader
     :keymaps 'org-mode-map
     "s" '(:ignore t :which-key "subtree")
