@@ -1999,8 +1999,8 @@ nor recent files."
   :config
   (setq org-special-ctrl-a/e t)
   (setq org-todo-keywords
-        '((sequence "TODO" "|" "DONE")
-          (sequence "UNKNOWN" "|")))
+        '((sequence "TODO(t)" "|" "DONE(d)")
+          (sequence "UNKNOWN(u)" "|")))
   (setq org-log-into-drawer t)
   (setq org-imenu-depth 8)
   (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
