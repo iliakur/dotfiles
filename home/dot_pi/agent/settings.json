@@ -3,6 +3,7 @@
   "defaultProvider": "ai-gw-logical",
   "defaultModel": "glm-5-3",
   "defaultThinkingLevel": "medium",
+  "hideThinkingBlock": true,
   "theme": "light",
   "packages": [
     "npm:pi-mcp-adapter",
